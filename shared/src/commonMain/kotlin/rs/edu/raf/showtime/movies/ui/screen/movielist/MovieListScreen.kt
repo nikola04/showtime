@@ -22,11 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import rs.edu.raf.showtime.movies.data.model.MovieMinDTO
-import rs.edu.raf.showtime.navigation.NavRoutes
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOption
@@ -34,7 +32,10 @@ import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOrde
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovieListScreen(navController: NavController) {
+fun MovieListScreen(
+    onMovieClick: (String) -> Unit,
+    onFiltersClick: () -> Unit
+) {
     val viewModel: MovieListViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -42,9 +43,9 @@ fun MovieListScreen(navController: NavController) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is Effect.NavigateToDetails ->
-                    navController.navigate(NavRoutes.MovieDetails().createRoute(effect.movieId))
+                    onMovieClick(effect.movieId)
                 is Effect.NavigateToFilter ->
-                    navController.navigate(NavRoutes.MovieListFilters.route)
+                    onFiltersClick()
             }
         }
     }

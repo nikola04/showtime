@@ -33,11 +33,13 @@ private fun HttpClientConfig<*>.installAuthPlugin(authStoreLazy: Lazy<AuthStore>
     createClientPlugin("AuthPlugin") {
         on(SetupRequest) { request ->
             val authStore = authStoreLazy.value
+
             when (val authState = authStore.authState.value) {
                 is AuthState.Authenticated -> {
                     request.header("Authorization", "Bearer ${authState.data.accessToken}")
                 }
                 AuthState.Unauthenticated -> Unit
+                AuthState.Loading -> Unit
             }
         }
 

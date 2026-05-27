@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
 import rs.edu.raf.showtime.movies.data.model.CastMemberDTO
@@ -61,7 +60,9 @@ import rs.edu.raf.showtime.movies.data.model.MovieDTO
 import kotlin.math.round
 
 @Composable
-fun MovieDetailsScreen(navController: NavController) {
+fun MovieDetailsScreen(
+    onBackClick: () -> Unit
+) {
     val viewModel: MovieDetailsViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
@@ -70,9 +71,7 @@ fun MovieDetailsScreen(navController: NavController) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is MovieDetailsContract.Effect.NavigateBack -> {
-                    if (navController.previousBackStackEntry != null) {
-                        navController.popBackStack()
-                    }
+                    onBackClick()
                 }
                 is MovieDetailsContract.Effect.OpenYoutube -> {
                     uriHandler.openUri("https://www.youtube.com/watch?v=${effect.id}")
