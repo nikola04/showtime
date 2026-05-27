@@ -1,6 +1,7 @@
 package rs.edu.raf.showtime.auth.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,16 +17,29 @@ fun AuthNavigation() {
         navController = navController,
         startDestination = AuthRoutes.Login.route
     ) {
-        authGraph()
+        authGraph(navController)
     }
 }
 
-fun NavGraphBuilder.authGraph() {
+fun NavGraphBuilder.authGraph(
+    navController: NavController,
+) {
     composable(AuthRoutes.Login.route) {
-        LoginScreen()
+        LoginScreen(
+            onRegisterClick = {
+                navController.navigate(AuthRoutes.Register.route)
+            }
+        )
     }
     composable(AuthRoutes.Register.route) {
-        RegisterScreen()
+        RegisterScreen(
+            onLoginClick = {
+                if (navController.previousBackStackEntry != null) {
+                    navController.popBackStack()
+                } else {
+                    navController.navigate(AuthRoutes.Login.route)
+                }
+            }
+        )
     }
 }
-

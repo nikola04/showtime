@@ -1,5 +1,6 @@
 package rs.edu.raf.showtime.network.di
 
+import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.api.Send
@@ -15,6 +16,13 @@ import rs.edu.raf.showtime.network.HttpClientFactory
 val networkModule = module {
     single<HttpClient> {
         HttpClientFactory.createHttpClient()
+    }
+
+    single {
+        Ktorfit.Builder()
+            .baseUrl("https://rma.finlab.rs/")
+            .httpClient(get<HttpClient>())
+            .build()
     }
 
     single<HttpClient>(Qualifiers.Unauthenticated) {

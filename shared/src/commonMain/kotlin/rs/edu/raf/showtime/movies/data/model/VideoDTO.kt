@@ -7,6 +7,5 @@ data class VideoDTO(
     val site: String,
     val name: String? = null,
     val type: String? = null,
-    val official: Boolean,
     val publishedAt: String? = null
 )
