@@ -12,9 +12,13 @@ import rs.edu.raf.showtime.core.auth.AuthStore
 import rs.edu.raf.showtime.core.auth.model.AuthState
 import rs.edu.raf.showtime.network.HttpClientFactory
 
-val networkModule = module{
-    single<HttpClient>(Qualifiers.Unauthenticated) {
+val networkModule = module {
+    single<HttpClient> {
         HttpClientFactory.createHttpClient()
+    }
+
+    single<HttpClient>(Qualifiers.Unauthenticated) {
+        get<HttpClient>()
     }
 
     single<HttpClient>(Qualifiers.Authenticated) {

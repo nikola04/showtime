@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import rs.edu.raf.showtime.ui.screen.moviedetails.MovieDetailsScreen
-import rs.edu.raf.showtime.ui.screen.movielist.MovieListScreen
-import rs.edu.raf.showtime.ui.screen.movielistfilter.MovieListFiltersScreen
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.MovieDetailsScreen
+import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListScreen
+import rs.edu.raf.showtime.movies.ui.screen.movielistfilter.MovieListFiltersScreen
 
 @Composable
 fun AppNavigation() {
