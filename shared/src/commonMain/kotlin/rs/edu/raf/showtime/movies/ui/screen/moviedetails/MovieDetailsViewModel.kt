@@ -3,6 +3,8 @@ package rs.edu.raf.showtime.movies.ui.screen.moviedetails
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +25,12 @@ class MovieDetailsViewModel(
     val effect = _effect.receiveAsFlow()
 
     private var currentMovieId: String? = null
+    private var loadMovieDetailsJob: Job? = null
 
     init {
         val movieId: String? = savedStateHandle["id"]
         if (movieId != null) {
+            currentMovieId = movieId
             loadMovieDetails(movieId)
         } else {
             _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Error("Invalid move ID")) }
@@ -37,6 +41,7 @@ class MovieDetailsViewModel(
         when(event) {
             is MovieDetailsContract.Event.LoadMovie -> {
                 currentMovieId = event.movieId
+                loadMovieDetails(event.movieId)
             }
             is MovieDetailsContract.Event.RetryClicked -> {
                 currentMovieId?.let { loadMovieDetails(it) }
@@ -55,18 +60,37 @@ class MovieDetailsViewModel(
     }
 
     private fun loadMovieDetails(movieId: String) {
-        viewModelScope.launch {
+        loadMovieDetailsJob?.cancel()
+        loadMovieDetailsJob = viewModelScope.launch {
             _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Loading) }
             try {
                 val movieDeferred = async { repository.getMovieDetails(movieId) }
                 val castDeferred = async {
-                    try { repository.getCast(movieId).items } catch (e: Exception) { emptyList() }
+                    try {
+                        repository.getCast(movieId).items
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
                 }
                 val imagesDeferred = async {
-                    try { repository.getImages(movieId).backdrops.take(5) } catch (e: Exception) { emptyList() }
+                    try {
+                        repository.getImages(movieId).backdrops.take(5)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
                 }
                 val videosDeferred = async {
-                    try { repository.getVideos(movieId, type = "Trailer") } catch (e: Exception) { emptyList() }
+                    try {
+                        repository.getVideos(movieId, type = "Trailer")
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
                 }
 
                 val movie = movieDeferred.await()
@@ -77,6 +101,8 @@ class MovieDetailsViewModel(
                 val trailer = videos.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
 
                 _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Success(movie, cast, images, trailer)) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _state.update {
                     it.copy(screenState = MovieDetailsContract.ScreenState.Error(e.message ?: "unknown error"))

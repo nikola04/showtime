@@ -1,6 +1,7 @@
 package rs.edu.raf.showtime.core.auth
 
 import androidx.datastore.core.okio.OkioSerializer
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
 import okio.BufferedSink
 import okio.BufferedSource
@@ -23,7 +24,7 @@ object AuthDataSerializer : OkioSerializer<AuthData> {
 
             json.decodeFromString<AuthData>(jsonString)
         } catch (e: Exception){
-            // log
+            Napier.e(e) { "AuthDataSerialized: Failed to read AuthData, returning default" }
             defaultValue
         }
     }

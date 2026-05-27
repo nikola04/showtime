@@ -6,7 +6,7 @@ import rs.edu.raf.showtime.core.auth.AuthStore
 import rs.edu.raf.showtime.core.auth.createAuthDataStore
 import rs.edu.raf.showtime.core.auth.model.AuthData
 
-val authModule = module {
+val coreAuthModule = module {
     single<DataStore<AuthData>> { createAuthDataStore() }
     single<AuthStore> { AuthStore(persistence = get()) }
 }

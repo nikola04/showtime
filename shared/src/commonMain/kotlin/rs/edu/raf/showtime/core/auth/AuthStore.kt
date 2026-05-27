@@ -16,12 +16,6 @@ import rs.edu.raf.showtime.core.auth.model.asAuthState
 class AuthStore(private val persistence: DataStore<AuthData>) {
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private val authData = persistence.data.stateIn(
-        scope = scope,
-        started = SharingStarted.Eagerly,
-        initialValue = AuthState.Loading
-    )
-
     suspend fun setAuthData(authData: AuthData) {
         persistence.updateData { authData }
     }
@@ -44,6 +38,6 @@ class AuthStore(private val persistence: DataStore<AuthData>) {
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = AuthState.Unauthenticated
+            initialValue = AuthState.Loading
         )
 }

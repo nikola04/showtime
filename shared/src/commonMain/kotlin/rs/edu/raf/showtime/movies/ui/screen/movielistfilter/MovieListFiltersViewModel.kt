@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import io.github.aakira.napier.Napier
 import rs.edu.raf.showtime.movies.data.repository.MovieRepository
 import rs.edu.raf.showtime.movies.ui.state.FilterManager
 import rs.edu.raf.showtime.movies.ui.screen.movielistfilter.MovieListFiltersContract.State
@@ -71,7 +72,7 @@ class MovieListFiltersViewModel(
                 val genres = repository.getGenres()
                 _state.update { it.copy(screenState = MovieListFiltersContract.ScreenState.Success(genres)) }
             } catch (e: Exception) {
-                println(e)
+                Napier.e("Failed to load genres", e)
                 _state.update { it.copy(screenState =  MovieListFiltersContract.ScreenState.Error(e.message ?: "failed to fetch genres")) }
             }
         }

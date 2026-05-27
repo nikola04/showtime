@@ -2,12 +2,15 @@ package rs.edu.raf.showtime.movies.ui.screen.movielist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import io.github.aakira.napier.Napier
 import rs.edu.raf.showtime.movies.data.repository.MovieRepository
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.State
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
@@ -21,6 +24,8 @@ class MovieListViewModel(
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
+
+    private var loadMoviesJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -36,10 +41,6 @@ class MovieListViewModel(
 
     private val _effect = Channel<Effect>()
     val effect = _effect.receiveAsFlow()
-
-    init {
-        onEvent(Event.LoadMovies)
-    }
 
     fun onEvent(event: Event) {
         when (event) {
@@ -72,7 +73,8 @@ class MovieListViewModel(
     }
 
     private fun loadMovies() {
-        viewModelScope.launch {
+        loadMoviesJob?.cancel()
+        loadMoviesJob = viewModelScope.launch {
             _state.update { it.copy(screenState = MovieListContract.ScreenState.Loading) }
             try {
                 val filters = _state.value.activeFilters
@@ -93,8 +95,10 @@ class MovieListViewModel(
                             MovieListContract.ScreenState.Success(result.items, result.totalItems)
                     )
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                println("MovieRepo Error: ${e.message}")
+                Napier.e("Failed to load movies", e)
                 _state.update {
                     it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))
                 }
