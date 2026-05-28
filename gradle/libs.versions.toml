@@ -18,6 +18,7 @@ ktorfit = "2.7.3"
 koin = "4.2.1"
 materialIconsExtended = "1.7.3"
 room = "2.8.4"
+sqlite = "2.6.2"
 kotlinxSerialization = "1.11.0"
 compose-hot-reload = "1.1.1"
 ktor = "3.0.1"
@@ -67,8 +68,10 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
