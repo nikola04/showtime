@@ -93,7 +93,11 @@ fun MovieListFiltersScreen(
             }
         )
     }) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+        ) {
             when (val screenState = state.screenState) {
                 is MovieListFiltersContract.ScreenState.Loading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -116,7 +120,7 @@ fun MovieListFiltersScreen(
                 is MovieListFiltersContract.ScreenState.Success -> {
                     val filters = state.activeFilters
                     val genres = screenState.genres
-                    Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth().verticalScroll(rememberScrollState()),
+                    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
 

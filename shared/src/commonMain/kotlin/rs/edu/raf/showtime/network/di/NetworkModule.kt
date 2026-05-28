@@ -10,6 +10,7 @@ import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
 import org.koin.dsl.module
 import rs.edu.raf.showtime.core.auth.AuthStore
+import rs.edu.raf.showtime.core.auth.UserSessionCleaner
 import rs.edu.raf.showtime.core.auth.model.AuthState
 import rs.edu.raf.showtime.network.HttpClientFactory
 
@@ -19,9 +20,20 @@ val networkModule = module {
     }
 
     single {
+        get<Ktorfit>(Qualifiers.Unauthenticated)
+    }
+
+    single<Ktorfit>(Qualifiers.Unauthenticated) {
         Ktorfit.Builder()
             .baseUrl("https://rma.finlab.rs/")
             .httpClient(get<HttpClient>())
+            .build()
+    }
+
+    single<Ktorfit>(Qualifiers.Authenticated) {
+        Ktorfit.Builder()
+            .baseUrl("https://rma.finlab.rs/")
+            .httpClient(get<HttpClient>(Qualifiers.Authenticated))
             .build()
     }
 
@@ -31,13 +43,17 @@ val networkModule = module {
 
     single<HttpClient>(Qualifiers.Authenticated) {
         val authStoreLazy: Lazy<AuthStore> = inject()
+        val userSessionCleanerLazy: Lazy<UserSessionCleaner> = inject()
         HttpClientFactory.createHttpClient{
-            installAuthPlugin(authStoreLazy)
+            installAuthPlugin(authStoreLazy, userSessionCleanerLazy)
         }
     }
 }
 
-private fun HttpClientConfig<*>.installAuthPlugin(authStoreLazy: Lazy<AuthStore>) = install(
+private fun HttpClientConfig<*>.installAuthPlugin(
+    authStoreLazy: Lazy<AuthStore>,
+    userSessionCleanerLazy: Lazy<UserSessionCleaner>,
+) = install(
     createClientPlugin("AuthPlugin") {
         on(SetupRequest) { request ->
             val authStore = authStoreLazy.value
@@ -58,7 +74,8 @@ private fun HttpClientConfig<*>.installAuthPlugin(authStoreLazy: Lazy<AuthStore>
                     return@run originalCall
                 }
 
-                // ignore even if 401 for now...
+                userSessionCleanerLazy.value.clearUserData()
+                authStoreLazy.value.clearAuthData()
                 originalCall
             }
         }

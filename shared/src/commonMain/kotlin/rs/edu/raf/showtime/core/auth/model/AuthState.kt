@@ -8,7 +8,7 @@ sealed class AuthState {
 
 fun AuthData.asAuthState(): AuthState {
     return when {
-        accessToken.isNullOrBlank() -> AuthState.Unauthenticated
+        accessToken.isNullOrBlank() || isExpired() -> AuthState.Unauthenticated
         else -> AuthState.Authenticated(data = this.copy())
     }
 }

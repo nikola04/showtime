@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import rs.edu.raf.showtime.auth.ui.screen.landing.AuthLandingScreen
 import rs.edu.raf.showtime.auth.ui.screen.login.LoginScreen
 import rs.edu.raf.showtime.auth.ui.screen.register.RegisterScreen
 
@@ -15,7 +16,7 @@ fun AuthNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = AuthRoutes.Login.route
+        startDestination = AuthRoutes.Landing.route
     ) {
         authGraph(navController)
     }
@@ -24,6 +25,17 @@ fun AuthNavigation() {
 fun NavGraphBuilder.authGraph(
     navController: NavController,
 ) {
+    composable(AuthRoutes.Landing.route) {
+        AuthLandingScreen(
+            onLoginClick = {
+                navController.navigate(AuthRoutes.Login.route)
+            },
+            onRegisterClick = {
+                navController.navigate(AuthRoutes.Register.route)
+            }
+        )
+    }
+
     composable(AuthRoutes.Login.route) {
         LoginScreen(
             onRegisterClick = {
@@ -34,11 +46,7 @@ fun NavGraphBuilder.authGraph(
     composable(AuthRoutes.Register.route) {
         RegisterScreen(
             onLoginClick = {
-                if (navController.previousBackStackEntry != null) {
-                    navController.popBackStack()
-                } else {
-                    navController.navigate(AuthRoutes.Login.route)
-                }
+                navController.navigate(AuthRoutes.Login.route)
             }
         )
     }

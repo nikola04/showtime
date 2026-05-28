@@ -61,7 +61,13 @@ class LoginViewModel(
                     password = currentState.password,
                 )
 
-                authStore.setAccessToken(response.accessToken)
+                authStore.setAuthSession(
+                    accessToken = response.accessToken,
+                    expiresInSeconds = response.expiresIn,
+                    userId = response.user.id,
+                    username = response.user.username,
+                    fullName = response.user.fullName,
+                )
                 _state.update { it.copy(screenState = LoginContract.ScreenState.Success) }
             } catch (e: CancellationException) {
                 throw e
@@ -79,13 +85,12 @@ class LoginViewModel(
     }
 
     private fun Exception.toLoginMessage(): String {
-        return when {
-            this is ClientRequestException && response.status == HttpStatusCode.Unauthorized ->
+        return when (this) {
+            is ClientRequestException if response.status == HttpStatusCode.Unauthorized ->
                 "Invalid username or password"
-            this is ClientRequestException ->
-                "Login failed (${response.status.value})"
-            else ->
-                "Login failed. Check your connection and try again."
+
+            is ClientRequestException -> "Login failed (${response.status.value})"
+            else -> "Login failed. Check your connection and try again."
         }
     }
 }

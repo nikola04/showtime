@@ -34,7 +34,7 @@ import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOrde
 @Composable
 fun MovieListScreen(
     onMovieClick: (String) -> Unit,
-    onFiltersClick: () -> Unit
+    onFiltersClick: () -> Unit,
 ) {
     val viewModel: MovieListViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -54,7 +54,7 @@ fun MovieListScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Premiere", fontWeight = FontWeight.Black)
+                    Text("Showtime", fontWeight = FontWeight.Black)
                 },
                 actions = {
                     Button(
@@ -85,12 +85,12 @@ fun MovieListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top=padding.calculateTopPadding())
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {

@@ -71,7 +71,13 @@ class RegisterViewModel(
                     password = currentState.password,
                 )
 
-                authStore.setAccessToken(response.accessToken)
+                authStore.setAuthSession(
+                    accessToken = response.accessToken,
+                    expiresInSeconds = response.expiresIn,
+                    userId = response.user.id,
+                    username = response.user.username,
+                    fullName = response.user.fullName,
+                )
                 _state.update { it.copy(screenState = RegisterContract.ScreenState.Success) }
             } catch (e: CancellationException) {
                 throw e

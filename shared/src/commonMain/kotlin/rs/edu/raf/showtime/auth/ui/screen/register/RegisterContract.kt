@@ -1,8 +1,10 @@
 package rs.edu.raf.showtime.auth.ui.screen.register
 
-object RegisterContract {
-    private val usernameRegex = Regex("^[A-Za-z0-9_]+$")
+import rs.edu.raf.showtime.auth.util.validateFullName
+import rs.edu.raf.showtime.auth.util.validatePassword
+import rs.edu.raf.showtime.auth.util.validateUsername
 
+object RegisterContract {
     sealed class ScreenState {
         data object Idle: ScreenState()
         data object Loading: ScreenState()
@@ -24,33 +26,21 @@ object RegisterContract {
             get() {
                 if (!hasSubmitted && fullName.isBlank()) return null
 
-                return when {
-                    fullName.isBlank() -> "Full name is required"
-                    else -> null
-                }
+                return validateFullName(fullName)
             }
 
         val usernameError: String?
             get() {
                 if (!hasSubmitted && username.isBlank()) return null
 
-                return when {
-                    username.isBlank() -> "Username is required"
-                    username.length < 3 -> "Username must be at least 3 characters"
-                    !usernameRegex.matches(username) -> "Use only letters, digits, and underscores"
-                    else -> null
-                }
+                return validateUsername(username)
             }
 
         val passwordError: String?
             get() {
                 if (!hasSubmitted && password.isBlank()) return null
 
-                return when {
-                    password.isBlank() -> "Password is required"
-                    password.length < 8 -> "Password must be at least 8 characters"
-                    else -> null
-                }
+                return validatePassword(password)
             }
 
         val canSubmit: Boolean
