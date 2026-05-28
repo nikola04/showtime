@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import io.github.aakira.napier.Napier
-import rs.edu.raf.showtime.movies.data.repository.MovieRepository
+import rs.edu.raf.showtime.movies.data.MovieRepository
 import rs.edu.raf.showtime.movies.ui.state.FilterManager
 import rs.edu.raf.showtime.movies.ui.screen.movielistfilter.MovieListFiltersContract.State
 import rs.edu.raf.showtime.movies.ui.screen.movielistfilter.MovieListFiltersContract.Event

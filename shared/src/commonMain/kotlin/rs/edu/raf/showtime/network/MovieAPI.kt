@@ -1,9 +1,15 @@
-package rs.edu.raf.showtime.movies.data.api
+package rs.edu.raf.showtime.network
 
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
-import rs.edu.raf.showtime.movies.data.model.*
+import rs.edu.raf.showtime.network.model.movies.CastResponse
+import rs.edu.raf.showtime.network.model.movies.ConfigDTO
+import rs.edu.raf.showtime.network.model.movies.GenreDTO
+import rs.edu.raf.showtime.network.model.movies.ImageResponse
+import rs.edu.raf.showtime.network.model.movies.MovieDTO
+import rs.edu.raf.showtime.network.model.movies.MovieListResponse
+import rs.edu.raf.showtime.network.model.movies.VideoDTO
 
 interface MovieAPI {
 

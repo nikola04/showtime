@@ -9,12 +9,22 @@ import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.header
 import io.ktor.http.HttpStatusCode
 import org.koin.dsl.module
+import rs.edu.raf.showtime.network.AuthAPI
 import rs.edu.raf.showtime.core.auth.AuthStore
 import rs.edu.raf.showtime.core.auth.UserSessionCleaner
 import rs.edu.raf.showtime.core.auth.model.AuthState
 import rs.edu.raf.showtime.network.HttpClientFactory
+import rs.edu.raf.showtime.network.MovieAPI
+import rs.edu.raf.showtime.network.ProfileAPI
+import rs.edu.raf.showtime.network.createAuthAPI
+import rs.edu.raf.showtime.network.createMovieAPI
+import rs.edu.raf.showtime.network.createProfileAPI
 
 val networkModule = module {
+    single<MovieAPI> { get<Ktorfit>().createMovieAPI() }
+    single<AuthAPI> { get<Ktorfit>().createAuthAPI() }
+    single<ProfileAPI> { get<Ktorfit>(Qualifiers.Authenticated).createProfileAPI() }
+
     single<HttpClient> {
         HttpClientFactory.createHttpClient()
     }

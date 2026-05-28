@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.movies.data.model.MovieMinDTO
+import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOption

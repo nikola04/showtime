@@ -1,6 +1,6 @@
 package rs.edu.raf.showtime.movies.ui.screen.movielist
 
-import rs.edu.raf.showtime.movies.data.model.MovieMinDTO
+import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
 import rs.edu.raf.showtime.movies.ui.state.FilterParams
 
 object MovieListContract {

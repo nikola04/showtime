@@ -18,7 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import rs.edu.raf.showtime.movies.data.model.Collection
+import rs.edu.raf.showtime.network.model.movies.Collection
 import kotlin.math.round
 
 @Composable

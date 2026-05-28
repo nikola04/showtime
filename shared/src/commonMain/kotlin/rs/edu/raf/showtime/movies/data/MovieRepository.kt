@@ -1,7 +1,12 @@
-package rs.edu.raf.showtime.movies.data.repository
+package rs.edu.raf.showtime.movies.data
 
-import rs.edu.raf.showtime.movies.data.api.MovieAPI
-import rs.edu.raf.showtime.movies.data.model.*
+import rs.edu.raf.showtime.network.MovieAPI
+import rs.edu.raf.showtime.network.model.movies.CastResponse
+import rs.edu.raf.showtime.network.model.movies.GenreDTO
+import rs.edu.raf.showtime.network.model.movies.ImageResponse
+import rs.edu.raf.showtime.network.model.movies.MovieDTO
+import rs.edu.raf.showtime.network.model.movies.MovieListResponse
+import rs.edu.raf.showtime.network.model.movies.VideoDTO
 
 class MovieRepository(private val api: MovieAPI) {
 

@@ -1,4 +1,4 @@
-package rs.edu.raf.showtime.movies.data.model
+package rs.edu.raf.showtime.network.model.movies
 
 import kotlinx.serialization.Serializable
 @Serializable

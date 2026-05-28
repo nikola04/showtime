@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import rs.edu.raf.showtime.auth.data.repository.AuthRepository
+import rs.edu.raf.showtime.auth.data.AuthRepository
 import rs.edu.raf.showtime.core.auth.AuthStore
 
 class RegisterViewModel(

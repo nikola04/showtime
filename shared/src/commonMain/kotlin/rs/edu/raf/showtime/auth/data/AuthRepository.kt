@@ -1,9 +1,9 @@
-package rs.edu.raf.showtime.auth.data.repository
+package rs.edu.raf.showtime.auth.data
 
-import rs.edu.raf.showtime.auth.data.api.AuthAPI
-import rs.edu.raf.showtime.auth.data.model.AuthResponse
-import rs.edu.raf.showtime.auth.data.model.LoginRequest
-import rs.edu.raf.showtime.auth.data.model.SignupRequest
+import rs.edu.raf.showtime.network.AuthAPI
+import rs.edu.raf.showtime.network.model.auth.AuthResponse
+import rs.edu.raf.showtime.network.model.auth.LoginRequest
+import rs.edu.raf.showtime.network.model.auth.SignupRequest
 
 class AuthRepository(
     private val api: AuthAPI,

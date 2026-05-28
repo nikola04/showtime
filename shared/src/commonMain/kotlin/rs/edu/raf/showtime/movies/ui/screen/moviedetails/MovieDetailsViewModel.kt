@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import rs.edu.raf.showtime.movies.data.repository.MovieRepository
+import rs.edu.raf.showtime.movies.data.MovieRepository
 
 class MovieDetailsViewModel(
     private val repository: MovieRepository,

@@ -1,4 +1,4 @@
-package rs.edu.raf.showtime.auth.data.model
+package rs.edu.raf.showtime.network.model.auth
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

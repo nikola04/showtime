@@ -55,8 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.movies.data.model.CastMemberDTO
-import rs.edu.raf.showtime.movies.data.model.MovieDTO
+import rs.edu.raf.showtime.network.model.movies.CastMemberDTO
+import rs.edu.raf.showtime.network.model.movies.MovieDTO
 import kotlin.math.round
 
 @Composable

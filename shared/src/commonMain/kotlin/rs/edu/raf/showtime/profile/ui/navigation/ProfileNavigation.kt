@@ -9,12 +9,6 @@ fun NavGraphBuilder.profileGraph(
     navController: NavController,
 ) {
     composable(ProfileRoutes.Profile.route) {
-        ProfileScreen(
-            onBackClick = {
-                if (navController.previousBackStackEntry != null) {
-                    navController.popBackStack()
-                }
-            }
-        )
+        ProfileScreen()
     }
 }

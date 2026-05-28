@@ -1,11 +1,11 @@
-package rs.edu.raf.showtime.auth.data.api
+package rs.edu.raf.showtime.network
 
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Headers
 import de.jensklingenberg.ktorfit.http.POST
-import rs.edu.raf.showtime.auth.data.model.AuthResponse
-import rs.edu.raf.showtime.auth.data.model.LoginRequest
-import rs.edu.raf.showtime.auth.data.model.SignupRequest
+import rs.edu.raf.showtime.network.model.auth.AuthResponse
+import rs.edu.raf.showtime.network.model.auth.LoginRequest
+import rs.edu.raf.showtime.network.model.auth.SignupRequest
 
 interface AuthAPI {
     @Headers("Content-Type: application/json", "Accept: application/json")

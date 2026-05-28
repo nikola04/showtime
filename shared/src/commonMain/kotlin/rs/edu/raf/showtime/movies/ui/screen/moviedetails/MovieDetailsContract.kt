@@ -1,9 +1,9 @@
 package rs.edu.raf.showtime.movies.ui.screen.moviedetails
 
-import rs.edu.raf.showtime.movies.data.model.CastMemberDTO
-import rs.edu.raf.showtime.movies.data.model.ImageDTO
-import rs.edu.raf.showtime.movies.data.model.MovieDTO
-import rs.edu.raf.showtime.movies.data.model.VideoDTO
+import rs.edu.raf.showtime.network.model.movies.CastMemberDTO
+import rs.edu.raf.showtime.network.model.movies.ImageDTO
+import rs.edu.raf.showtime.network.model.movies.MovieDTO
+import rs.edu.raf.showtime.network.model.movies.VideoDTO
 
 object MovieDetailsContract {
     sealed class ScreenState {

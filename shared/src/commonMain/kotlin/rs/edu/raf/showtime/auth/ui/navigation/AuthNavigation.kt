@@ -39,14 +39,22 @@ fun NavGraphBuilder.authGraph(
     composable(AuthRoutes.Login.route) {
         LoginScreen(
             onRegisterClick = {
-                navController.navigate(AuthRoutes.Register.route)
+                navController.navigate(AuthRoutes.Register.route) {
+                    popUpTo(AuthRoutes.Login.route) {
+                        inclusive = true
+                    }
+                }
             }
         )
     }
     composable(AuthRoutes.Register.route) {
         RegisterScreen(
             onLoginClick = {
-                navController.navigate(AuthRoutes.Login.route)
+                navController.navigate(AuthRoutes.Login.route) {
+                    popUpTo(AuthRoutes.Register.route) {
+                        inclusive = true
+                    }
+                }
             }
         )
     }
