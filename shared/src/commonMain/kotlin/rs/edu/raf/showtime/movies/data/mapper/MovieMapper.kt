@@ -23,7 +23,9 @@ fun MovieMinDTO.toMovieEntity(): MovieEntity {
         budget = budget,
         revenue = revenue,
         languageCode = language,
-        popularity = popularity?.toFloat()
+        popularity = popularity?.toFloat(),
+
+        hasDetails = false
     )
 }
 
@@ -48,7 +50,9 @@ fun MovieDTO.toMovieEntity(): MovieEntity {
         posterPath = posterPath,
         backdropPath = backdropPath,
         homepage = homepage,
-        collectionId = collection?.id
+        collectionId = collection?.id,
+
+        hasDetails = true
     )
 }
 

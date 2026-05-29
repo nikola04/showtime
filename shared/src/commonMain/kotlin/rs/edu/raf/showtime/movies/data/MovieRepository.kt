@@ -52,8 +52,19 @@ class MovieRepository(
         appDatabase.movieDao()
             .observeMovieDetails(imdbId)
             .map { row ->
-                row?.toDomain()
+                if (row?.movie?.hasDetails == true) {
+                    row.toDomain()
+                } else {
+                    null
+                }
             }
+
+    override suspend fun hasMovieDetails(imdbId: String): Boolean {
+        return appDatabase.movieDao()
+            .getMovieDetails(imdbId)
+            ?.movie
+            ?.hasDetails == true
+    }
 
     override fun observeGenres(): Flow<List<Genre>> =
         appDatabase.movieDao()

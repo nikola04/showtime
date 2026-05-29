@@ -26,4 +26,5 @@ data class MovieEntity (
     val backdropPath: String? = null,
     val homepage: String? = null,
     val collectionId: Long? = null,
+    val hasDetails: Boolean = false
 )

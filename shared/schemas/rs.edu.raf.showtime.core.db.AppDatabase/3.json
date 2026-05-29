@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "23056c16c9b2af9eb40e8963ae2c336c",
+    "identityHash": "459af40ee2bb1233faf899f3518e2fa0",
     "entities": [
       {
         "tableName": "movies",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `title` TEXT NOT NULL, `originalTitle` TEXT, `overview` TEXT, `tagline` TEXT, `releaseDate` TEXT, `year` INTEGER, `runtime` INTEGER, `budget` INTEGER, `revenue` INTEGER, `languageCode` TEXT, `popularity` REAL, `imdbRating` REAL, `imdbVotes` INTEGER, `tmdbRating` REAL, `tmdbVotes` INTEGER, `posterPath` TEXT, `backdropPath` TEXT, `homepage` TEXT, `collectionId` INTEGER, PRIMARY KEY(`imdbId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `title` TEXT NOT NULL, `originalTitle` TEXT, `overview` TEXT, `tagline` TEXT, `releaseDate` TEXT, `year` INTEGER, `runtime` INTEGER, `budget` INTEGER, `revenue` INTEGER, `languageCode` TEXT, `popularity` REAL, `imdbRating` REAL, `imdbVotes` INTEGER, `tmdbRating` REAL, `tmdbVotes` INTEGER, `posterPath` TEXT, `backdropPath` TEXT, `homepage` TEXT, `collectionId` INTEGER, `hasDetails` INTEGER NOT NULL, PRIMARY KEY(`imdbId`))",
         "fields": [
           {
             "fieldPath": "imdbId",
@@ -109,6 +109,12 @@
             "fieldPath": "collectionId",
             "columnName": "collectionId",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hasDetails",
+            "columnName": "hasDetails",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -428,7 +434,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '23056c16c9b2af9eb40e8963ae2c336c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '459af40ee2bb1233faf899f3518e2fa0')"
     ]
   }
 }
