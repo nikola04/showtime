@@ -93,7 +93,7 @@ fun MovieDetailsScreen(
                         Text("Error loading movie details", style = MaterialTheme.typography.bodyLarge)
                         Spacer(Modifier.height(8.dp))
                         Text(screenState.message, style = MaterialTheme.typography.bodySmall)
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(12.dp))
                         Button(onClick = { viewModel.onEvent(event = MovieDetailsContract.Event.RetryClicked)}) {
                             Text("Retry")
                         }

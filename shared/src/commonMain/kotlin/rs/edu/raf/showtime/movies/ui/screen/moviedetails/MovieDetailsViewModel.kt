@@ -139,7 +139,7 @@ class MovieDetailsViewModel(
                 val hasCachedMovie = repository.hasMovieDetails(movieId)
                 if (!hasCachedMovie) {
                     _state.update {
-                        it.copy(screenState = MovieDetailsContract.ScreenState.Error("Failed to load movie"))
+                        it.copy(screenState = MovieDetailsContract.ScreenState.Error("Network request failed"))
                     }
                 }
             }

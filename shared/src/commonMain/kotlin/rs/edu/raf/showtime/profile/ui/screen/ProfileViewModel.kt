@@ -27,6 +27,7 @@ class ProfileViewModel(
     fun onEvent(action: ProfileContract.Event) {
         when (action) {
             is ProfileContract.Event.Logout -> logout()
+            is ProfileContract.Event.RetryClicked -> loadProfile()
         }
     }
 
@@ -56,7 +57,7 @@ class ProfileViewModel(
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 Napier.e("Failed to load profile from API", e)
                 _state.update {
-                    it.copy(screenState = ProfileContract.ScreenState.Error(e.message ?: "Unknown error"))
+                    it.copy(screenState = ProfileContract.ScreenState.Error("Network request failed"))
                 }
             }
         }

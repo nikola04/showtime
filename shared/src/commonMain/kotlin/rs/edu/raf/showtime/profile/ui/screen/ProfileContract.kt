@@ -19,5 +19,6 @@ object ProfileContract {
 
     sealed class Event {
         data object Logout : Event()
+        data object RetryClicked : Event()
     }
 }
