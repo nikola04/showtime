@@ -20,7 +20,6 @@ object MovieListContract {
 
     sealed class Event {
         data class SortChanged(val option: SortOption) : Event()
-        data class FiltersApplied(val filters: FilterParams) : Event()
         data class MovieClicked(val movieId: String) : Event()
         data object FilterButtonClicked : Event()
         data object RetryClicked : Event()
@@ -41,6 +40,6 @@ object MovieListContract {
 
     enum class SortOrder(val value: String) {
         DESC("desc"),
-        ASC("ASC")
+        ASC("asc")
     }
 }

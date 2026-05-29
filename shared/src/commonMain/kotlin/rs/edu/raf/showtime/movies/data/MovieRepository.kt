@@ -66,6 +66,11 @@ class MovieRepository(
             ?.hasDetails == true
     }
 
+    override suspend fun getMoviesCount(): Int {
+        return appDatabase.movieDao()
+            .getMoviesCount()
+    }
+
     override fun observeGenres(): Flow<List<Genre>> =
         appDatabase.movieDao()
             .observeGenres()

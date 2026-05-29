@@ -19,6 +19,8 @@ interface MovieRepository {
 
     suspend fun hasMovieDetails(imdbId: String): Boolean
 
+    suspend fun getMoviesCount(): Int
+
     fun observeGenres(): Flow<List<Genre>>
 
     suspend fun getGenres(): List<Genre>

@@ -16,6 +16,7 @@ import rs.edu.raf.showtime.movies.data.MovieRepository
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.State
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect
+import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect.*
 import rs.edu.raf.showtime.movies.ui.state.FilterManager
 
 class MovieListViewModel(
@@ -52,19 +53,17 @@ class MovieListViewModel(
                 _state.update { it.copy(sortBy = event.option) }
                 startObservingMovies()
             }
-            is Event.FiltersApplied -> {
-                // Filters are collected via filterManager in init
-            }
             is Event.MovieClicked -> {
                 viewModelScope.launch {
-                    _effect.send(Effect.NavigateToDetails(event.movieId))
+                    _effect.send(NavigateToDetails(event.movieId))
                 }
             }
             is Event.FilterButtonClicked -> {
                 viewModelScope.launch {
-                    _effect.send(Effect.NavigateToFilter)
+                    _effect.send(NavigateToFilter)
                 }
             }
+
         }
     }
 
@@ -83,11 +82,9 @@ class MovieListViewModel(
             ).collect { movies ->
                 _state.update {
                     it.copy(
-                        screenState = if (movies.isEmpty()) {
-                            if (syncMoviesJob?.isActive == true) MovieListContract.ScreenState.Loading
-                            else MovieListContract.ScreenState.Empty
-                        } else {
-                            MovieListContract.ScreenState.Success(movies, movies.size)
+                        screenState = when {
+                            movies.isEmpty() -> MovieListContract.ScreenState.Empty
+                            else -> MovieListContract.ScreenState.Success(movies, movies.size)
                         }
                     )
                 }
@@ -98,7 +95,14 @@ class MovieListViewModel(
     private fun syncMovies() {
         syncMoviesJob?.cancel()
         syncMoviesJob = viewModelScope.launch {
+            val hasCachedData = repository.getMoviesCount() > 0
+
             try {
+                if (!hasCachedData)
+                    _state.update {
+                        it.copy(screenState = MovieListContract.ScreenState.Loading)
+                    }
+
                 Napier.d("Starting movie sync...")
                 repository.refreshMovies()
                 Napier.d("Movie sync completed successfully")
@@ -109,14 +113,12 @@ class MovieListViewModel(
                 Napier.e("Failed to sync movies", e)
                 
                 val errorMessage = e::class.simpleName ?: "Sync failed"
-                _effect.send(Effect.ShowError(errorMessage))
+                _effect.send(ShowError(errorMessage))
 
-                if (_state.value.screenState is MovieListContract.ScreenState.Empty ||
-                    _state.value.screenState is MovieListContract.ScreenState.Loading) {
+                if (!hasCachedData)
                     _state.update {
                         it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))
                     }
-                }
             }
         }
     }
