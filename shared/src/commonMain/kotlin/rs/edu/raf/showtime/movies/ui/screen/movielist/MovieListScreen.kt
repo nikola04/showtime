@@ -3,9 +3,10 @@ package rs.edu.raf.showtime.movies.ui.screen.movielist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
+import rs.edu.raf.showtime.movies.domain.Movie
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOption
@@ -132,21 +133,20 @@ fun MovieListScreen(
                     }
                 }
                 is MovieListContract.ScreenState.Success -> {
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
                             .padding(horizontal = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Spacer(Modifier.height(4.dp))
-                        screenState.movies.forEach { movie ->
+                        item { Spacer(Modifier.height(4.dp)) }
+                        items(screenState.movies) { movie ->
                             MovieListItem(
                                 movie = movie,
                                 onClick = { viewModel.onEvent(Event.MovieClicked(movie.imdbId)) }
                             )
                         }
-                        Spacer(Modifier.height(12.dp))
+                        item { Spacer(Modifier.height(12.dp)) }
                     }
                 }
             }
@@ -192,7 +192,7 @@ fun SortPill(
 
 @Composable
 fun MovieListItem(
-    movie: MovieMinDTO,
+    movie: Movie,
     onClick: () -> Unit
 ) {
     Card(

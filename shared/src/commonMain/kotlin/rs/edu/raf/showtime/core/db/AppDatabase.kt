@@ -25,7 +25,7 @@ import rs.edu.raf.showtime.movies.db.MovieGenreCrossRef
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun MovieDao(): MovieDao
+    abstract fun movieDao(): MovieDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")

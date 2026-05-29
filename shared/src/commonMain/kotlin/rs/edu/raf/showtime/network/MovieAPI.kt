@@ -15,6 +15,7 @@ interface MovieAPI {
 
     @GET("movies")
     suspend fun getMovies(
+        @Query("page") page: Int = 1,
         @Query("page_size") pageSize: Int = 30,
         @Query("sort_by") sortBy: String = "imdb_rating",
         @Query("sort_order") sortOrder: String = "desc",

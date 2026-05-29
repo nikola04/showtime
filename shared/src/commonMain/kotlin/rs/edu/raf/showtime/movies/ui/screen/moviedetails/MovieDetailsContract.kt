@@ -1,18 +1,18 @@
 package rs.edu.raf.showtime.movies.ui.screen.moviedetails
 
-import rs.edu.raf.showtime.network.model.movies.CastMemberDTO
-import rs.edu.raf.showtime.network.model.movies.ImageDTO
-import rs.edu.raf.showtime.network.model.movies.MovieDTO
-import rs.edu.raf.showtime.network.model.movies.VideoDTO
+import rs.edu.raf.showtime.movies.domain.CastMember
+import rs.edu.raf.showtime.movies.domain.MovieDetails
+import rs.edu.raf.showtime.movies.domain.MovieImage
+import rs.edu.raf.showtime.movies.domain.MovieVideo
 
 object MovieDetailsContract {
     sealed class ScreenState {
         data object Loading : ScreenState()
         data class Success(
-            val movie: MovieDTO,
-            val cast: List<CastMemberDTO> = emptyList(),
-            val images: List<ImageDTO> = emptyList(),
-            val trailer: VideoDTO?
+            val movie: MovieDetails,
+            val cast: List<CastMember> = emptyList(),
+            val images: List<MovieImage> = emptyList(),
+            val trailer: MovieVideo?
         ): ScreenState()
         data class Error(val message: String): ScreenState()
     }

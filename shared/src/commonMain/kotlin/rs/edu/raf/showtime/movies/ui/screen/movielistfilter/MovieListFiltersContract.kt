@@ -1,11 +1,11 @@
 package rs.edu.raf.showtime.movies.ui.screen.movielistfilter
 
-import rs.edu.raf.showtime.network.model.movies.GenreDTO
+import rs.edu.raf.showtime.movies.domain.Genre
 import rs.edu.raf.showtime.movies.ui.state.FilterParams
 
 object MovieListFiltersContract {
     sealed class ScreenState {
-        data class Success(val genres: List<GenreDTO>): ScreenState()
+        data class Success(val genres: List<Genre>): ScreenState()
         data class Error(val message: String): ScreenState()
         data object Loading: ScreenState()
     }

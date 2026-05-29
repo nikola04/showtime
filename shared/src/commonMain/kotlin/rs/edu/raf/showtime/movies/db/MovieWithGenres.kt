@@ -10,6 +10,10 @@ data class MovieWithGenres (
     @Relation(
         parentColumn = "imdbId",
         entityColumn = "id",
-        associateBy = Junction(MovieGenreCrossRef::class)
+        associateBy = Junction(
+            value = MovieGenreCrossRef::class,
+            parentColumn = "imdbId",
+            entityColumn = "genreId"
+        )
     ) val genres: List<GenreEntity>
 )

@@ -3,9 +3,9 @@ package rs.edu.raf.showtime.movies.db
 import androidx.room.Entity
 
 @Entity(
-    primaryKeys = ["movieId", "genreId"]
+    primaryKeys = ["imdbId", "genreId"]
 )
 data class MovieGenreCrossRef(
-    val movieId: String,
+    val imdbId: String,
     val genreId: Int,
 )

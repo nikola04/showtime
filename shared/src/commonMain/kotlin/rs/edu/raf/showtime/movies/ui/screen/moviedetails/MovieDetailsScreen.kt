@@ -55,8 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.network.model.movies.CastMemberDTO
-import rs.edu.raf.showtime.network.model.movies.MovieDTO
+import rs.edu.raf.showtime.movies.domain.CastMember
+import rs.edu.raf.showtime.movies.domain.MovieDetails
 import kotlin.math.round
 
 @Composable
@@ -225,10 +225,10 @@ fun MovieDetailsScreen(
                                 if (movie.imdbRating != null || movie.tmdbRating != null){
                                     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                                         movie.imdbRating?.let { rating ->
-                                            RatingChip(label = "IMDb", rating, votes = movie.imdbVotes)
+                                            LocalRatingChip(label = "IMDb", rating, votes = movie.imdbVotes)
                                         }
                                         movie.tmdbRating?.let { rating ->
-                                            RatingChip(label = "TMDb", rating, votes = movie.tmdbVotes)
+                                            LocalRatingChip(label = "TMDb", rating, votes = movie.tmdbVotes)
                                         }
                                     }
                                 }
@@ -253,16 +253,16 @@ fun MovieDetailsScreen(
                                 }
 
                                 if (!movie.overview.isNullOrBlank()) {
-                                    SectionTitle("OVERVIEW")
+                                    LocalSectionTitle("OVERVIEW")
                                     Text(text = movie.overview,
                                         style = MaterialTheme.typography.bodyMedium)
                                 }
 
-                                SectionTitle("DETAILS")
+                                LocalSectionTitle("DETAILS")
                                 DetailsGrid(movie)
 
                                 if (images.isNotEmpty()) {
-                                    SectionTitle("IMAGES")
+                                    LocalSectionTitle("IMAGES")
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                                         images.forEach { image ->
@@ -270,7 +270,7 @@ fun MovieDetailsScreen(
                                                 shape = RoundedCornerShape(8.dp),
                                                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)) {
                                                 AsyncImage(
-                                                    model = "https://image.tmdb.org/t/p/w300${image.filePath}}",
+                                                    model = "https://image.tmdb.org/t/p/w300${image.filePath}",
                                                     contentDescription = null,
                                                     contentScale = ContentScale.Crop,
                                                     modifier = Modifier.fillMaxSize()
@@ -281,13 +281,13 @@ fun MovieDetailsScreen(
                                 }
 
                                 if (screenState.cast.isNotEmpty()) {
-                                    SectionTitle("CAST")
+                                    LocalSectionTitle("CAST")
                                     CastRow(screenState.cast)
                                 }
 
                                 if (movie.collection != null) {
-                                    SectionTitle("Part of a collection")
-                                    CollectionCard(movie.collection)
+                                    LocalSectionTitle("Part of a collection")
+                                    LocalCollectionCard(movie.collection)
                                 }
 
                                 Spacer(modifier = Modifier.height(32.dp))
@@ -318,7 +318,7 @@ fun MovieDetailsScreen(
 }
 
 @Composable
-private fun DetailsGrid(movie: MovieDTO) {
+private fun DetailsGrid(movie: MovieDetails) {
     val items = buildList {
         movie.languageCode?.let { add("Language" to it.uppercase()) }
         movie.budget?.takeIf { it > 0 }?.let { add("Budget" to formatMoney(it)) }
@@ -360,7 +360,7 @@ private fun DetailsGrid(movie: MovieDTO) {
 }
 
 @Composable
-private fun CastRow(cast: List<CastMemberDTO>) {
+private fun CastRow(cast: List<CastMember>) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         items(cast) { member ->
             Column(
@@ -408,6 +408,80 @@ private fun CastRow(cast: List<CastMemberDTO>) {
     }
 }
 
+@Composable
+private fun LocalRatingChip(label: String, rating: Float, votes: Int?) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Column {
+                Text(
+                    text = rating.toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Black
+                )
+                if (votes != null && votes > 0) {
+                    Text(
+                        text = "${formatLocalVotes(votes)} votes",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocalSectionTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+private fun LocalCollectionCard(collection: rs.edu.raf.showtime.movies.domain.Collection) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (collection.posterPath != null) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w185${collection.posterPath}",
+                    contentDescription = collection.name,
+                    modifier = Modifier.size(60.dp, 90.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Spacer(Modifier.width(16.dp))
+            Text(text = collection.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+private fun formatLocalVotes(votes: Int): String = when {
+    votes >= 1_000_000 -> "${round(votes / 100_000.0) / 10.0}M"
+    votes >= 1_000 -> "${round(votes / 100.0) / 10.0}K"
+    else -> votes.toString()
+}
+
 private fun formatRuntime(minutes: Int): String {
     val h = minutes / 60
     val m = minutes % 60
@@ -417,11 +491,11 @@ private fun formatRuntime(minutes: Int): String {
 private fun formatMoney(amount: Long): String = when {
     amount >= 1_000_000_000 -> {
         val v = amount / 1_000_000_000.0
-        "$${round(v)}B"
+        "$${round(v * 10) / 10.0}B"
     }
     amount >= 1_000_000 -> {
         val v = amount / 1_000_000.0
-        "$${round(v)}M"
+        "$${round(v * 10) / 10.0}M"
     }
     else -> "$$amount"
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,16 +26,19 @@ class MovieListViewModel(
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
 
-    private var loadMoviesJob: Job? = null
+    private var observeMoviesJob: Job? = null
+    private var syncMoviesJob: Job? = null
 
     init {
         viewModelScope.launch {
-            filterManager.activeFilters.collect { filters ->
+            filterManager.activeFilters.collectLatest { filters ->
                 _state.update {
                     it.copy(activeFilters = filters, activeFilterCount = filters.activeCount())
                 }
-
-                loadMovies()
+                
+                // Restart observation and sync when filters change
+                startObservingMovies()
+                syncMovies()
             }
         }
     }
@@ -44,20 +48,15 @@ class MovieListViewModel(
 
     fun onEvent(event: Event) {
         when (event) {
-            is Event.LoadMovies -> loadMovies()
-            is Event.RetryClicked -> loadMovies()
+            is Event.LoadMovies -> syncMovies()
+            is Event.RetryClicked -> syncMovies()
             is Event.SortChanged -> {
                 _state.update { it.copy(sortBy = event.option) }
-                loadMovies()
+                startObservingMovies()
+                syncMovies()
             }
             is Event.FiltersApplied -> {
-                _state.update {
-                    it.copy(
-                        activeFilters = event.filters,
-                        activeFilterCount = event.filters.activeCount()
-                    )
-                }
-                loadMovies()
+                // Filters are collected via filterManager in init
             }
             is Event.MovieClicked -> {
                 viewModelScope.launch {
@@ -72,35 +71,48 @@ class MovieListViewModel(
         }
     }
 
-    private fun loadMovies() {
-        loadMoviesJob?.cancel()
-        loadMoviesJob = viewModelScope.launch {
-            _state.update { it.copy(screenState = MovieListContract.ScreenState.Loading) }
-            try {
-                val filters = _state.value.activeFilters
-                val result = repository.getMovies(
-                    sortBy = _state.value.sortBy.apiValue,
-                    sortOrder = _state.value.sortBy.order.value,
-                    genreId = filters.genreId,
-                    query = filters.query,
-                    minYear = filters.minYear,
-                    maxYear = filters.maxYear,
-                    minRating = filters.minRating
-                )
+    private fun startObservingMovies() {
+        observeMoviesJob?.cancel()
+        observeMoviesJob = viewModelScope.launch {
+            val filters = _state.value.activeFilters
+            repository.observeMovies(
+                sortBy = _state.value.sortBy.apiValue,
+                sortOrder = _state.value.sortBy.order.value,
+                genreId = filters.genreId,
+                query = filters.query,
+                minYear = filters.minYear,
+                maxYear = filters.maxYear,
+                minRating = filters.minRating
+            ).collect { movies ->
                 _state.update {
                     it.copy(
-                        screenState = if (result.items.isEmpty())
-                            MovieListContract.ScreenState.Empty
-                        else
-                            MovieListContract.ScreenState.Success(result.items, result.totalItems)
+                        screenState = if (movies.isEmpty()) {
+                            if (syncMoviesJob?.isActive == true) MovieListContract.ScreenState.Loading
+                            else MovieListContract.ScreenState.Empty
+                        } else {
+                            MovieListContract.ScreenState.Success(movies, movies.size) // Note: size in local observation is not full total
+                        }
                     )
                 }
+            }
+        }
+    }
+
+    private fun syncMovies() {
+        syncMoviesJob?.cancel()
+        syncMoviesJob = viewModelScope.launch {
+            try {
+                repository.refreshMovies()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Napier.e("Failed to load movies", e)
-                _state.update {
-                    it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))
+                Napier.e("Failed to sync movies", e)
+                // If DB is empty, then show error
+                if (_state.value.screenState is MovieListContract.ScreenState.Empty || 
+                    _state.value.screenState is MovieListContract.ScreenState.Loading) {
+                    _state.update {
+                        it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))
+                    }
                 }
             }
         }

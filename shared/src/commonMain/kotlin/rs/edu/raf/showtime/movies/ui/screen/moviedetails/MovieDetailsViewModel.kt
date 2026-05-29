@@ -9,10 +9,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import rs.edu.raf.showtime.movies.data.MovieRepository
+import rs.edu.raf.showtime.movies.domain.CastMember
+import rs.edu.raf.showtime.movies.domain.MovieDetails
+import rs.edu.raf.showtime.movies.domain.MovieImage
+import rs.edu.raf.showtime.movies.domain.MovieVideo
 
 class MovieDetailsViewModel(
     private val repository: MovieRepository,
@@ -25,15 +30,17 @@ class MovieDetailsViewModel(
     val effect = _effect.receiveAsFlow()
 
     private var currentMovieId: String? = null
-    private var loadMovieDetailsJob: Job? = null
+    private var observeDetailsJob: Job? = null
+    private var syncDetailsJob: Job? = null
 
     init {
         val movieId: String? = savedStateHandle["id"]
         if (movieId != null) {
             currentMovieId = movieId
-            loadMovieDetails(movieId)
+            startObservingDetails(movieId)
+            syncDetails(movieId)
         } else {
-            _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Error("Invalid move ID")) }
+            _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Error("Invalid movie ID")) }
         }
     }
 
@@ -41,10 +48,14 @@ class MovieDetailsViewModel(
         when(event) {
             is MovieDetailsContract.Event.LoadMovie -> {
                 currentMovieId = event.movieId
-                loadMovieDetails(event.movieId)
+                startObservingDetails(event.movieId)
+                syncDetails(event.movieId)
             }
             is MovieDetailsContract.Event.RetryClicked -> {
-                currentMovieId?.let { loadMovieDetails(it) }
+                currentMovieId?.let { 
+                    startObservingDetails(it)
+                    syncDetails(it)
+                }
             }
             is MovieDetailsContract.Event.BackClicked -> {
                 viewModelScope.launch {
@@ -59,53 +70,68 @@ class MovieDetailsViewModel(
         }
     }
 
-    private fun loadMovieDetails(movieId: String) {
-        loadMovieDetailsJob?.cancel()
-        loadMovieDetailsJob = viewModelScope.launch {
-            _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Loading) }
+    private fun startObservingDetails(movieId: String) {
+        observeDetailsJob?.cancel()
+        observeDetailsJob = viewModelScope.launch {
+            repository.observeMovieDetails(movieId).collectLatest { movieDetails ->
+                if (movieDetails != null) {
+                    // When we have movie details from DB, we still need cast/images/videos from API
+                    fetchExtraData(movieDetails)
+                } else {
+                    _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Loading) }
+                }
+            }
+        }
+    }
+
+    private suspend fun fetchExtraData(movie: MovieDetails) {
+        val castDeferred = viewModelScope.async {
             try {
-                val movieDeferred = async { repository.getMovieDetails(movieId) }
-                val castDeferred = async {
-                    try {
-                        repository.getCast(movieId).items
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        emptyList()
-                    }
-                }
-                val imagesDeferred = async {
-                    try {
-                        repository.getImages(movieId).backdrops.take(5)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        emptyList()
-                    }
-                }
-                val videosDeferred = async {
-                    try {
-                        repository.getVideos(movieId, type = "Trailer")
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        emptyList()
-                    }
-                }
-
-                val movie = movieDeferred.await()
-                val cast = castDeferred.await()
-                val images = imagesDeferred.await()
-                val videos = videosDeferred.await()
-
-                val trailer = videos.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
-
-                _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Success(movie, cast, images, trailer)) }
-            } catch (e: CancellationException) {
-                throw e
+                repository.getCast(movie.imdbId).items
             } catch (e: Exception) {
-                _state.update {
-                    it.copy(screenState = MovieDetailsContract.ScreenState.Error(e.message ?: "unknown error"))
+                if (e is CancellationException) throw e
+                emptyList<CastMember>()
+            }
+        }
+        val imagesDeferred = viewModelScope.async {
+            try {
+                repository.getImages(movie.imdbId).backdrops.take(5)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                emptyList<MovieImage>()
+            }
+        }
+        val videosDeferred = viewModelScope.async {
+            try {
+                repository.getVideos(movie.imdbId, type = "Trailer")
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                emptyList<MovieVideo>()
+            }
+        }
+
+        val cast = castDeferred.await()
+        val images = imagesDeferred.await()
+        val videos = videosDeferred.await()
+        val trailer = videos.firstOrNull { it.site == "YouTube" && it.type == "Trailer" }
+
+        _state.update { 
+            it.copy(screenState = MovieDetailsContract.ScreenState.Success(movie, cast, images, trailer)) 
+        }
+    }
+
+    private fun syncDetails(movieId: String) {
+        syncDetailsJob?.cancel()
+        syncDetailsJob = viewModelScope.launch {
+            try {
+                repository.refreshMovieDetails(movieId)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                // If we don't have data in DB yet, show error
+                if (_state.value.screenState is MovieDetailsContract.ScreenState.Loading) {
+                    _state.update { 
+                        it.copy(screenState = MovieDetailsContract.ScreenState.Error(e.message ?: "Unknown error")) 
+                    }
                 }
             }
         }

@@ -1,13 +1,13 @@
 package rs.edu.raf.showtime.movies.ui.screen.movielist
 
-import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
+import rs.edu.raf.showtime.movies.domain.Movie
 import rs.edu.raf.showtime.movies.ui.state.FilterParams
 
 object MovieListContract {
 
     sealed class ScreenState {
         data object Loading : ScreenState()
-        data class Success(val movies: List<MovieMinDTO>, val total: Int) : ScreenState()
+        data class Success(val movies: List<Movie>, val total: Int) : ScreenState()
         data class Error(val message: String) : ScreenState()
         data object Empty : ScreenState()
     }
