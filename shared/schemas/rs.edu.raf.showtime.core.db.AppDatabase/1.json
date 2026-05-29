@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 3,
-    "identityHash": "459af40ee2bb1233faf899f3518e2fa0",
+    "version": 1,
+    "identityHash": "0d03c894dd784c5feae2e64ac5860a41",
     "entities": [
       {
         "tableName": "movies",
@@ -430,11 +430,35 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "watchlist",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movieId` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`movieId`))",
+        "fields": [
+          {
+            "fieldPath": "movieId",
+            "columnName": "movieId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "movieId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '459af40ee2bb1233faf899f3518e2fa0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0d03c894dd784c5feae2e64ac5860a41')"
     ]
   }
 }

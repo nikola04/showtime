@@ -59,9 +59,9 @@ fun MainNavigation() {
         ) {
             moviesGraph(navController)
             favoritesGraph(navController)
-            watchlistGraph(navController)
             quizGraph(navController)
             profileGraph()
+            watchlistGraph(navController)
         }
     }
 }

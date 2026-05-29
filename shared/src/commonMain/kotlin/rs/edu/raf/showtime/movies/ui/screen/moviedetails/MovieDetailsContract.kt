@@ -10,6 +10,8 @@ object MovieDetailsContract {
         data object Loading : ScreenState()
         data class Success(
             val movie: MovieDetails,
+            val isFavorite: Boolean = false,
+            val isInWatchlist: Boolean = false,
             val cast: List<CastMember> = emptyList(),
             val images: List<MovieImage> = emptyList(),
             val trailer: MovieVideo?
@@ -20,7 +22,8 @@ object MovieDetailsContract {
     data class State(val screenState: ScreenState = ScreenState.Loading)
 
     sealed class Event {
-        data class LoadMovie(val movieId: String) : Event()
+        data object ToggleFavorite : Event()
+        data object ToggleWatchlist : Event()
         data object BackClicked : Event()
         data object RetryClicked : Event()
         data class OpenYoutube(val id: String): Event()

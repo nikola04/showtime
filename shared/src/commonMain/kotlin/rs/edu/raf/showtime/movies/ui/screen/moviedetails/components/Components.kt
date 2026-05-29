@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import rs.edu.raf.showtime.core.util.formatVotes
 import kotlin.math.round
 
 @Composable
@@ -76,12 +77,6 @@ fun CollectionCard(collection: rs.edu.raf.showtime.movies.domain.Collection) {
             Text(text = collection.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
     }
-}
-
-fun formatVotes(votes: Int): String = when {
-    votes >= 1_000_000 -> "${round(votes / 100_000.0) / 10.0}M"
-    votes >= 1_000 -> "${round(votes / 100.0) / 10.0}K"
-    else -> votes.toString()
 }
 
 fun formatRuntime(minutes: Int): String {

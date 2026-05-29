@@ -1,8 +1,6 @@
-package rs.edu.raf.showtime.movies.ui.screen.movielist.components
+package rs.edu.raf.showtime.watchlist.ui.screen.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,16 +9,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,8 +33,9 @@ import rs.edu.raf.showtime.core.util.formatVotes
 import rs.edu.raf.showtime.movies.domain.Movie
 
 @Composable
-fun MovieListItem(
+fun WatchlistMovieItem(
     movie: Movie,
+    onToggleWatchlist: () -> Unit,
     onClick: () -> Unit
 ) {
     Card(
@@ -49,7 +47,10 @@ fun MovieListItem(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
-        Row(modifier = Modifier.padding(10.dp)) {
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             AsyncImage(
                 model = "https://image.tmdb.org/t/p/w185${movie.posterPath}",
                 contentDescription = movie.title,
@@ -96,27 +97,17 @@ fun MovieListItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    movie.genres.forEach { genre ->
-                        SuggestionChip(
-                            onClick = {},
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                labelColor = MaterialTheme.colorScheme.onBackground
-                            ),
-                            label = {
-                                Text(
-                                    genre.name,
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            }
-                        )
-                    }
-                }
+            }
+
+            IconButton(
+                onClick = onToggleWatchlist,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Bookmark,
+                    contentDescription = "Remove from watchlist",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

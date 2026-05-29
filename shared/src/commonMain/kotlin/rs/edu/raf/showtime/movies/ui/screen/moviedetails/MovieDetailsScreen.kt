@@ -51,6 +51,7 @@ import coil3.compose.AsyncImage
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.CastRow
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.CollectionCard
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.DetailsGrid
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.MovieActions
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.RatingChip
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.SectionTitle
 import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.formatRuntime
@@ -217,6 +218,17 @@ fun MovieDetailsScreen(
                             }
                         }
                         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                            MovieActions(
+                                isFavorite = screenState.isFavorite,
+                                isWatchlist = screenState.isInWatchlist,
+                                onFavoriteClick = {
+                                    viewModel.onEvent(MovieDetailsContract.Event.ToggleFavorite)
+                                },
+                                onWatchlistClick = {
+                                    viewModel.onEvent(MovieDetailsContract.Event.ToggleWatchlist)
+                                }
+                            )
+
                             Spacer(modifier = Modifier.width(4.dp))
 
                             // ----- Content -----

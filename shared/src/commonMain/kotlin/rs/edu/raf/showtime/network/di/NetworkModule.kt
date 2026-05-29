@@ -16,14 +16,17 @@ import rs.edu.raf.showtime.core.auth.model.AuthState
 import rs.edu.raf.showtime.network.HttpClientFactory
 import rs.edu.raf.showtime.network.MovieAPI
 import rs.edu.raf.showtime.network.ProfileAPI
+import rs.edu.raf.showtime.network.WatchlistAPI
 import rs.edu.raf.showtime.network.createAuthAPI
 import rs.edu.raf.showtime.network.createMovieAPI
 import rs.edu.raf.showtime.network.createProfileAPI
+import rs.edu.raf.showtime.network.createWatchlistAPI
 
 val networkModule = module {
     single<MovieAPI> { get<Ktorfit>().createMovieAPI() }
     single<AuthAPI> { get<Ktorfit>().createAuthAPI() }
     single<ProfileAPI> { get<Ktorfit>(Qualifiers.Authenticated).createProfileAPI() }
+    single<WatchlistAPI> { get<Ktorfit>(Qualifiers.Authenticated).createWatchlistAPI() }
 
     single<HttpClient> {
         HttpClientFactory.createHttpClient()

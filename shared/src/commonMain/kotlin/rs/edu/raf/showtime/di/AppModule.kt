@@ -7,7 +7,10 @@ import rs.edu.raf.showtime.core.db.di.databaseModule
 import rs.edu.raf.showtime.movies.di.moviesModule
 import rs.edu.raf.showtime.network.di.networkModule
 import rs.edu.raf.showtime.profile.di.profileModule
+import rs.edu.raf.showtime.watchlist.di.watchlistModule
 
 val appModule = module {
-    includes(databaseModule(), coreAuthModule, authModule, networkModule, moviesModule, profileModule)
+    includes(databaseModule(), coreAuthModule, authModule, networkModule, moviesModule, profileModule,
+        watchlistModule
+    )
 }

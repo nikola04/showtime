@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import rs.edu.raf.showtime.network.model.profile.UserDto
+import rs.edu.raf.showtime.profile.domain.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +82,7 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileDetails(profile: UserDto) {
+fun ProfileDetails(profile: User) {
     Column(
         modifier = Modifier.padding(vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

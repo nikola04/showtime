@@ -15,6 +15,8 @@ import rs.edu.raf.showtime.movies.db.MovieGenreCrossRef
 import rs.edu.raf.showtime.movies.db.CastMemberEntity
 import rs.edu.raf.showtime.movies.db.MovieImageEntity
 import rs.edu.raf.showtime.movies.db.MovieVideoEntity
+import rs.edu.raf.showtime.watchlist.db.WatchlistDao
+import rs.edu.raf.showtime.watchlist.db.WatchlistEntity
 
 @Database(
     entities = [
@@ -24,14 +26,16 @@ import rs.edu.raf.showtime.movies.db.MovieVideoEntity
         MovieGenreCrossRef::class,
         CastMemberEntity::class,
         MovieImageEntity::class,
-        MovieVideoEntity::class
+        MovieVideoEntity::class,
+        WatchlistEntity::class
                ],
-    version = 3,
+    version = 1,
     exportSchema = true
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
+    abstract fun watchlistDao(): WatchlistDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
@@ -43,7 +47,6 @@ fun buildAppDatabase(
     builder: RoomDatabase.Builder<AppDatabase>
 ): AppDatabase {
     return builder
-        .fallbackToDestructiveMigration(dropAllTables = true)
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

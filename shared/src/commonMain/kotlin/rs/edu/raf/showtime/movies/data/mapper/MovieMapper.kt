@@ -29,6 +29,23 @@ fun MovieMinDTO.toMovieEntity(): MovieEntity {
     )
 }
 
+fun MovieEntity.toDomain(): Movie {
+    return Movie(
+        imdbId = imdbId,
+        title = title,
+        year = year,
+        runtime = runtime,
+        imdbRating = imdbRating,
+        imdbVotes = imdbVotes,
+        posterPath = posterPath,
+        genres = emptyList(),
+        budget = budget,
+        revenue = revenue,
+        language = languageCode,
+        popularity = popularity
+    )
+}
+
 fun MovieDTO.toMovieEntity(): MovieEntity {
     return MovieEntity(
         imdbId = imdbId,

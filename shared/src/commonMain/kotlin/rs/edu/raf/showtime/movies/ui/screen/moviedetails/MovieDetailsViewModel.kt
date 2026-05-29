@@ -15,9 +15,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import rs.edu.raf.showtime.movies.data.MovieRepository
 import rs.edu.raf.showtime.movies.domain.MovieDetails
+import rs.edu.raf.showtime.watchlist.data.WatchlistRepository
 
 class MovieDetailsViewModel(
-    private val repository: MovieRepository,
+    private val movieRepository: MovieRepository,
+    private val watchlistRepository: WatchlistRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -36,7 +38,6 @@ class MovieDetailsViewModel(
         movieId?.let {
             observeMovie(it)
             syncMovie(it)
-
         } ?: run {
             _state.update {
                 it.copy(screenState = MovieDetailsContract.ScreenState.Error("Invalid movie ID"))
@@ -50,6 +51,14 @@ class MovieDetailsViewModel(
                 movieId?.let(::syncMovie)
             }
 
+            is MovieDetailsContract.Event.ToggleWatchlist -> {
+                movieId?.let(::toggleWatchlist)
+            }
+
+            is MovieDetailsContract.Event.ToggleFavorite -> {
+                movieId?.let(::toggleFavorites)
+            }
+
             is MovieDetailsContract.Event.BackClicked -> {
                 viewModelScope.launch {
                     _effect.send(MovieDetailsContract.Effect.NavigateBack)
@@ -61,8 +70,17 @@ class MovieDetailsViewModel(
                     _effect.send(MovieDetailsContract.Effect.OpenYoutube(event.id))
                 }
             }
+        }
+    }
 
-            else -> Unit
+    private fun toggleWatchlist(movieId: String) {
+        viewModelScope.launch {
+            watchlistRepository.toggleMovie(movieId)
+        }
+    }
+
+    private fun toggleFavorites(movieId: String) {
+        viewModelScope.launch {
         }
     }
 
@@ -70,42 +88,52 @@ class MovieDetailsViewModel(
         observeJob?.cancel()
 
         observeJob = viewModelScope.launch {
-            repository.observeMovieDetails(movieId)
-                .collectLatest { movie ->
+            launch {
+                watchlistRepository.observeWatchlistMovieState(movieId).collectLatest { isInWatchlist ->
+                    _state.update { state ->
+                        val screenState = state.screenState
+                        if (screenState is MovieDetailsContract.ScreenState.Success) {
+                            state.copy(
+                                screenState = screenState.copy(isInWatchlist = isInWatchlist)
+                            )
+                        } else {
+                            state
+                        }
+                    }
+                }
+            }
 
+            movieRepository.observeMovieDetails(movieId)
+                .collectLatest { movie ->
                     if (movie == null) {
                         _state.update {
-                            it.copy(
-                                screenState = MovieDetailsContract.ScreenState.Loading
-                            )
+                            it.copy(screenState = MovieDetailsContract.ScreenState.Loading)
                         }
                         return@collectLatest
                     }
-
                     loadExtras(movie)
                 }
         }
     }
 
     private suspend fun loadExtras(movie: MovieDetails) {
-
-        val cast = viewModelScope.async {
+        val castDeferred = viewModelScope.async {
             runCatching {
-                repository.getCast(movie.imdbId).items
+                movieRepository.getCast(movie.imdbId).items
             }.getOrDefault(emptyList())
         }
 
-        val images = viewModelScope.async {
+        val imagesDeferred = viewModelScope.async {
             runCatching {
-                repository.getImages(movie.imdbId)
+                movieRepository.getImages(movie.imdbId)
                     .backdrops
                     .take(5)
             }.getOrDefault(emptyList())
         }
 
-        val trailer = viewModelScope.async {
+        val trailerDeferred = viewModelScope.async {
             runCatching {
-                repository.getVideos(movie.imdbId, "Trailer")
+                movieRepository.getVideos(movie.imdbId, "Trailer")
                     .firstOrNull {
                         it.site == "YouTube" &&
                                 it.type == "Trailer"
@@ -113,13 +141,17 @@ class MovieDetailsViewModel(
             }.getOrNull()
         }
 
+        val isInWatchlist = watchlistRepository.isMovieInWatchlist(movie.imdbId)
+
         _state.update {
             it.copy(
                 screenState = MovieDetailsContract.ScreenState.Success(
                     movie = movie,
-                    cast = cast.await(),
-                    images = images.await(),
-                    trailer = trailer.await()
+                    cast = castDeferred.await(),
+                    images = imagesDeferred.await(),
+                    trailer = trailerDeferred.await(),
+                    isInWatchlist = isInWatchlist,
+                    isFavorite = false
                 )
             )
         }
@@ -130,13 +162,13 @@ class MovieDetailsViewModel(
 
         syncJob = viewModelScope.launch {
             try {
-                repository.refreshMovieDetails(movieId)
+                movieRepository.refreshMovieDetails(movieId)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
 
                 _effect.send(MovieDetailsContract.Effect.ShowError("Failed to sync movie"))
 
-                val hasCachedMovie = repository.hasMovieDetails(movieId)
+                val hasCachedMovie = movieRepository.hasMovieDetails(movieId)
                 if (!hasCachedMovie) {
                     _state.update {
                         it.copy(screenState = MovieDetailsContract.ScreenState.Error("Network request failed"))
