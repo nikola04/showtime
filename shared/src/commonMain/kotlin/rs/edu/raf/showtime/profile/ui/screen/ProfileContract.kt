@@ -9,5 +9,15 @@ object ProfileContract {
         data class Error(val message: String) : ScreenState()
     }
 
-    data class State(val screenState: ScreenState = ScreenState.Loading)
+    data class State(
+        val screenState: ScreenState = ScreenState.Loading,
+        val favoriteCount: Int = 0,
+        val watchlistCount: Int = 0,
+        val quizGamesPlayed: Int = 0,
+        val bestQuizScore: Float = 0f
+    )
+
+    sealed class Event {
+        data object Logout : Event()
+    }
 }

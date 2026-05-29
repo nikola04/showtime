@@ -1,14 +1,14 @@
 package rs.edu.raf.showtime.profile.ui.navigation
 
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import org.koin.compose.viewmodel.koinViewModel
 import rs.edu.raf.showtime.profile.ui.screen.ProfileScreen
+import rs.edu.raf.showtime.profile.ui.screen.ProfileViewModel
 
-fun NavGraphBuilder.profileGraph(
-    navController: NavController,
-) {
+fun NavGraphBuilder.profileGraph() {
     composable(ProfileRoutes.Profile.route) {
-        ProfileScreen()
+        val viewModel: ProfileViewModel = koinViewModel()
+        ProfileScreen(viewModel)
     }
 }

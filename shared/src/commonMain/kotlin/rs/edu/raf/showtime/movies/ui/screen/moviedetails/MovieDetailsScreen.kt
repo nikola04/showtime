@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,22 +44,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.movies.domain.CastMember
-import rs.edu.raf.showtime.movies.domain.MovieDetails
-import kotlin.math.round
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.CastRow
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.CollectionCard
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.DetailsGrid
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.RatingChip
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.SectionTitle
+import rs.edu.raf.showtime.movies.ui.screen.moviedetails.components.formatRuntime
 
 @Composable
 fun MovieDetailsScreen(
+    viewModel: MovieDetailsViewModel,
     onBackClick: () -> Unit
 ) {
-    val viewModel: MovieDetailsViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
@@ -232,10 +227,18 @@ fun MovieDetailsScreen(
                                 if (movie.imdbRating != null || movie.tmdbRating != null){
                                     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                                         movie.imdbRating?.let { rating ->
-                                            LocalRatingChip(label = "IMDb", rating, votes = movie.imdbVotes)
+                                            RatingChip(
+                                                label = "IMDb",
+                                                rating,
+                                                votes = movie.imdbVotes
+                                            )
                                         }
                                         movie.tmdbRating?.let { rating ->
-                                            LocalRatingChip(label = "TMDb", rating, votes = movie.tmdbVotes)
+                                            RatingChip(
+                                                label = "TMDb",
+                                                rating,
+                                                votes = movie.tmdbVotes
+                                            )
                                         }
                                     }
                                 }
@@ -260,16 +263,16 @@ fun MovieDetailsScreen(
                                 }
 
                                 if (!movie.overview.isNullOrBlank()) {
-                                    LocalSectionTitle("OVERVIEW")
+                                    SectionTitle("OVERVIEW")
                                     Text(text = movie.overview,
                                         style = MaterialTheme.typography.bodyMedium)
                                 }
 
-                                LocalSectionTitle("DETAILS")
+                                SectionTitle("DETAILS")
                                 DetailsGrid(movie)
 
                                 if (images.isNotEmpty()) {
-                                    LocalSectionTitle("IMAGES")
+                                    SectionTitle("IMAGES")
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())){
                                         images.forEach { image ->
@@ -288,13 +291,13 @@ fun MovieDetailsScreen(
                                 }
 
                                 if (screenState.cast.isNotEmpty()) {
-                                    LocalSectionTitle("CAST")
+                                    SectionTitle("CAST")
                                     CastRow(screenState.cast)
                                 }
 
                                 if (movie.collection != null) {
-                                    LocalSectionTitle("Part of a collection")
-                                    LocalCollectionCard(movie.collection)
+                                    SectionTitle("Part of a collection")
+                                    CollectionCard(movie.collection)
                                 }
 
                                 Spacer(modifier = Modifier.height(32.dp))
@@ -322,187 +325,4 @@ fun MovieDetailsScreen(
             }
         }
     }
-}
-
-@Composable
-private fun DetailsGrid(movie: MovieDetails) {
-    val items = buildList {
-        movie.languageCode?.let { add("Language" to it.uppercase()) }
-        movie.budget?.takeIf { it > 0 }?.let { add("Budget" to formatMoney(it)) }
-        movie.revenue?.takeIf { it > 0 }?.let { add("Revenue" to formatMoney(it)) }
-        movie.popularity?.let { add("Popularity" to (round(it * 10f) / 10f).toString()) }
-    }
-
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items.forEach { (key, value) ->
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.wrapContentSize()
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = key,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CastRow(cast: List<CastMember>) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        items(cast) { member ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(80.dp)
-            ) {
-                Card(
-                    shape = CircleShape,
-                    modifier = Modifier.size(64.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    if (member.profilePath != null) {
-                        AsyncImage(
-                            model = "https://image.tmdb.org/t/p/w185${member.profilePath}",
-                            contentDescription = member.name,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = member.name,
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun LocalRatingChip(label: String, rating: Float, votes: Int?) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shape = RoundedCornerShape(16.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Column {
-                Text(
-                    text = rating.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Black
-                )
-                if (votes != null && votes > 0) {
-                    Text(
-                        text = "${formatLocalVotes(votes)} votes",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LocalSectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-}
-
-@Composable
-private fun LocalCollectionCard(collection: rs.edu.raf.showtime.movies.domain.Collection) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (collection.posterPath != null) {
-                AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w185${collection.posterPath}",
-                    contentDescription = collection.name,
-                    modifier = Modifier.size(60.dp, 90.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Spacer(Modifier.width(16.dp))
-            Text(text = collection.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-private fun formatLocalVotes(votes: Int): String = when {
-    votes >= 1_000_000 -> "${round(votes / 100_000.0) / 10.0}M"
-    votes >= 1_000 -> "${round(votes / 100.0) / 10.0}K"
-    else -> votes.toString()
-}
-
-private fun formatRuntime(minutes: Int): String {
-    val h = minutes / 60
-    val m = minutes % 60
-    return if (h > 0) "${h}h ${m}m" else "${m}min"
-}
-
-private fun formatMoney(amount: Long): String = when {
-    amount >= 1_000_000_000 -> {
-        val v = amount / 1_000_000_000.0
-        "$${round(v * 10) / 10.0}B"
-    }
-    amount >= 1_000_000 -> {
-        val v = amount / 1_000_000.0
-        "$${round(v * 10) / 10.0}M"
-    }
-    else -> "$$amount"
 }

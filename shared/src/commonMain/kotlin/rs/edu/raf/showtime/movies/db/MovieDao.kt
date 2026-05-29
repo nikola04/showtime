@@ -18,8 +18,6 @@ interface MovieDao {
         genres: List<GenreEntity>,
         refs: List<MovieGenreCrossRef>,
     ) {
-        clearMovies()
-        clearMovieGenreCrossRefs()
         insertMovies(movies)
         insertGenres(genres)
         insertMovieGenreCrossRefs(refs)

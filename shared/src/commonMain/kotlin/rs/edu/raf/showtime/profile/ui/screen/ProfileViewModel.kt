@@ -14,24 +14,46 @@ import rs.edu.raf.showtime.profile.data.ProfileRepository
 class ProfileViewModel(
     private val authStore: AuthStore,
     private val userSessionCleaner: UserSessionCleaner,
-    private val repository: ProfileRepository
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileContract.State())
     val state = _state.asStateFlow()
 
     init {
         loadProfile()
+        observeStats()
+    }
+
+    fun onEvent(action: ProfileContract.Event) {
+        when (action) {
+            is ProfileContract.Event.Logout -> logout()
+        }
+    }
+
+    private fun observeStats() {
+//        viewModelScope.launch {
+//            movieRepository.observeFavoriteCount().collectLatest { count ->
+//                _state.update { it.copy(favoriteCount = count) }
+//            }
+//        }
+//        viewModelScope.launch {
+//            movieRepository.observeWatchlistCount().collectLatest { count ->
+//                _state.update { it.copy(watchlistCount = count) }
+//            }
+//        }
+        // TODO: Observe quiz stats when implemented
     }
 
     private fun loadProfile() {
         viewModelScope.launch {
             _state.update { it.copy(screenState = ProfileContract.ScreenState.Loading) }
             try {
-                val result = repository.getProfile()
+                val result = profileRepository.getProfile()
                 _state.update {
                     it.copy(screenState = ProfileContract.ScreenState.Success(result))
                 }
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 Napier.e("Failed to load profile from API", e)
                 _state.update {
                     it.copy(screenState = ProfileContract.ScreenState.Error(e.message ?: "Unknown error"))
@@ -39,7 +61,8 @@ class ProfileViewModel(
             }
         }
     }
-    fun logout() {
+
+    private fun logout() {
         viewModelScope.launch {
             userSessionCleaner.clearUserData()
             authStore.clearAuthData()

@@ -19,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.compose.viewmodel.koinViewModel
 import rs.edu.raf.showtime.network.model.profile.UserDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(){
-    val viewModel: ProfileViewModel = koinViewModel()
+fun ProfileScreen(
+    viewModel: ProfileViewModel
+){
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -54,7 +54,7 @@ fun ProfileScreen(){
                         }
 
                         Button(
-                            onClick = { viewModel.logout() },
+                            onClick = { viewModel.onEvent(ProfileContract.Event.Logout) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Logout")

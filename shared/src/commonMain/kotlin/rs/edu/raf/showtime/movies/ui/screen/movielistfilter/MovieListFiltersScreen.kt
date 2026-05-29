@@ -39,16 +39,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.round
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListFiltersScreen(
+    viewModel: MovieListFiltersViewModel,
     onBackClick: () -> Unit,
     onApplyFilters: () -> Unit
 ) {
-    val viewModel: MovieListFiltersViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit){

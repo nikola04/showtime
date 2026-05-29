@@ -61,7 +61,7 @@ fun MainNavigation() {
             favoritesGraph(navController)
             watchlistGraph(navController)
             quizGraph(navController)
-            profileGraph(navController)
+            profileGraph()
         }
     }
 }

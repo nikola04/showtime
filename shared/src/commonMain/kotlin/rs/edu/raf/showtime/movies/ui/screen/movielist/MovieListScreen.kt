@@ -1,43 +1,31 @@
 package rs.edu.raf.showtime.movies.ui.screen.movielist
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import org.koin.compose.viewmodel.koinViewModel
-import rs.edu.raf.showtime.movies.domain.Movie
+import rs.edu.raf.showtime.movies.ui.screen.movielist.components.MovieListItem
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Event
 import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.Effect
-import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOption
-import rs.edu.raf.showtime.movies.ui.screen.movielist.MovieListContract.SortOrder
+import rs.edu.raf.showtime.movies.ui.screen.movielist.components.SortPill
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(
+    viewModel: MovieListViewModel,
     onMovieClick: (String) -> Unit,
     onFiltersClick: () -> Unit,
 ) {
-    val viewModel: MovieListViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -159,133 +147,3 @@ fun MovieListScreen(
     }
 }
 
-@Composable
-fun SortPill(
-    currentSort: SortOption,
-    onSortChanged: (SortOption) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        FilterChip(
-            selected = true,
-            onClick = { expanded = true },
-            label = {
-                Text("Sort: ${currentSort.label}")
-            },
-            trailingIcon = {
-                Icon(
-                    imageVector = if (currentSort.order == SortOrder.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            SortOption.entries.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option.label) },
-                    onClick = {
-                        onSortChanged(option)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun MovieListItem(
-    movie: Movie,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Row(modifier = Modifier.padding(10.dp)) {
-            AsyncImage(
-                model = "https://image.tmdb.org/t/p/w185${movie.posterPath}",
-                contentDescription = movie.title,
-                modifier = Modifier
-                    .width(80.dp)
-                    .height(110.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "${movie.year ?: ""}${if (movie.runtime != null) " · ${movie.runtime} min" else ""}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "${movie.imdbRating ?: "-"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFC107)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = formatVotes(movie.imdbVotes),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    movie.genres.forEach { genre ->
-                        SuggestionChip(
-                            onClick = {},
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                labelColor = MaterialTheme.colorScheme.onBackground
-                            ),
-                            label = { Text(genre.name, style = MaterialTheme.typography.labelSmall) }
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun formatVotes(votes: Int?): String {
-    if (votes == null) return ""
-    return when {
-        votes >= 1_000_000 -> {
-            val millions = votes / 1_000_000.0
-            val rounded = (millions * 10).toInt() / 10.0
-            "${rounded}M votes"
-        }
-        votes >= 1_000 -> "${votes / 1000}K votes"
-        else -> "$votes votes"
-    }
-}
