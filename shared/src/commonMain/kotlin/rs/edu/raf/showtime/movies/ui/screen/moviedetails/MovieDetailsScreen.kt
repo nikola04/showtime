@@ -36,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -66,6 +67,7 @@ fun MovieDetailsScreen(
     val viewModel: MovieDetailsViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    val snackbarHostState = androidx.compose.runtime.remember { androidx.compose.material3.SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -76,11 +78,16 @@ fun MovieDetailsScreen(
                 is MovieDetailsContract.Effect.OpenYoutube -> {
                     uriHandler.openUri("https://www.youtube.com/watch?v=${effect.id}")
                 }
+                is MovieDetailsContract.Effect.ShowError -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
             }
         }
     }
 
-    Scaffold{
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ){
         Box(modifier = Modifier.fillMaxSize()) {
             when (val screenState = state.screenState) {
                 is MovieDetailsContract.ScreenState.Loading -> {

@@ -12,15 +12,21 @@ import rs.edu.raf.showtime.movies.db.GenreEntity
 import rs.edu.raf.showtime.movies.db.MovieDao
 import rs.edu.raf.showtime.movies.db.MovieEntity
 import rs.edu.raf.showtime.movies.db.MovieGenreCrossRef
+import rs.edu.raf.showtime.movies.db.CastMemberEntity
+import rs.edu.raf.showtime.movies.db.MovieImageEntity
+import rs.edu.raf.showtime.movies.db.MovieVideoEntity
 
 @Database(
     entities = [
         MovieEntity::class,
         CollectionEntity::class,
         GenreEntity::class,
-        MovieGenreCrossRef::class
+        MovieGenreCrossRef::class,
+        CastMemberEntity::class,
+        MovieImageEntity::class,
+        MovieVideoEntity::class
                ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -37,6 +43,7 @@ fun buildAppDatabase(
     builder: RoomDatabase.Builder<AppDatabase>
 ): AppDatabase {
     return builder
+        .fallbackToDestructiveMigration(dropAllTables = true)
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

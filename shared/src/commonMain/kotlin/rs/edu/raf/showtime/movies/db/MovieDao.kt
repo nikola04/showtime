@@ -61,6 +61,15 @@ interface MovieDao {
         refs: List<MovieGenreCrossRef>
     )
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCastMembers(cast: List<CastMemberEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovieImages(images: List<MovieImageEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovieVideos(videos: List<MovieVideoEntity>)
+
     // GET SINGLE MOVIE
 
     @Transaction
@@ -220,6 +229,33 @@ interface MovieDao {
     ): Flow<List<MovieDetailed>>
 
     // GENRES
+
+    @Query("SELECT * FROM cast_members WHERE imdbId = :imdbId")
+    fun observeCast(imdbId: String): Flow<List<CastMemberEntity>>
+
+    @Query("SELECT * FROM cast_members WHERE imdbId = :imdbId")
+    suspend fun getCast(imdbId: String): List<CastMemberEntity>
+
+    @Query("SELECT * FROM movie_images WHERE imdbId = :imdbId")
+    fun observeImages(imdbId: String): Flow<List<MovieImageEntity>>
+
+    @Query("SELECT * FROM movie_images WHERE imdbId = :imdbId")
+    suspend fun getImages(imdbId: String): List<MovieImageEntity>
+
+    @Query("SELECT * FROM movie_videos WHERE imdbId = :imdbId")
+    fun observeVideos(imdbId: String): Flow<List<MovieVideoEntity>>
+
+    @Query("SELECT * FROM movie_videos WHERE imdbId = :imdbId")
+    suspend fun getVideos(imdbId: String): List<MovieVideoEntity>
+
+    @Query("DELETE FROM cast_members WHERE imdbId = :imdbId")
+    suspend fun deleteCast(imdbId: String)
+
+    @Query("DELETE FROM movie_images WHERE imdbId = :imdbId")
+    suspend fun deleteImages(imdbId: String)
+
+    @Query("DELETE FROM movie_videos WHERE imdbId = :imdbId")
+    suspend fun deleteVideos(imdbId: String)
 
     @Query("SELECT COUNT(*) FROM movies")
     suspend fun getMoviesCount(): Int

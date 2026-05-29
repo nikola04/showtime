@@ -35,12 +35,11 @@ class MovieListViewModel(
                 _state.update {
                     it.copy(activeFilters = filters, activeFilterCount = filters.activeCount())
                 }
-                
-                // Restart observation and sync when filters change
+
                 startObservingMovies()
-                syncMovies()
             }
         }
+        syncMovies()
     }
 
     private val _effect = Channel<Effect>()
@@ -48,12 +47,10 @@ class MovieListViewModel(
 
     fun onEvent(event: Event) {
         when (event) {
-            is Event.LoadMovies -> syncMovies()
             is Event.RetryClicked -> syncMovies()
             is Event.SortChanged -> {
                 _state.update { it.copy(sortBy = event.option) }
                 startObservingMovies()
-                syncMovies()
             }
             is Event.FiltersApplied -> {
                 // Filters are collected via filterManager in init
@@ -90,7 +87,7 @@ class MovieListViewModel(
                             if (syncMoviesJob?.isActive == true) MovieListContract.ScreenState.Loading
                             else MovieListContract.ScreenState.Empty
                         } else {
-                            MovieListContract.ScreenState.Success(movies, movies.size) // Note: size in local observation is not full total
+                            MovieListContract.ScreenState.Success(movies, movies.size)
                         }
                     )
                 }
@@ -102,13 +99,19 @@ class MovieListViewModel(
         syncMoviesJob?.cancel()
         syncMoviesJob = viewModelScope.launch {
             try {
+                Napier.d("Starting movie sync...")
                 repository.refreshMovies()
+                Napier.d("Movie sync completed successfully")
             } catch (e: CancellationException) {
+                Napier.d("Movie sync cancelled")
                 throw e
             } catch (e: Exception) {
                 Napier.e("Failed to sync movies", e)
-                // If DB is empty, then show error
-                if (_state.value.screenState is MovieListContract.ScreenState.Empty || 
+                
+                val errorMessage = e::class.simpleName ?: "Sync failed"
+                _effect.send(Effect.ShowError(errorMessage))
+
+                if (_state.value.screenState is MovieListContract.ScreenState.Empty ||
                     _state.value.screenState is MovieListContract.ScreenState.Loading) {
                     _state.update {
                         it.copy(screenState = MovieListContract.ScreenState.Error(e.message ?: "Unknown error"))

@@ -4,7 +4,6 @@ import rs.edu.raf.showtime.movies.domain.Movie
 import rs.edu.raf.showtime.movies.ui.state.FilterParams
 
 object MovieListContract {
-
     sealed class ScreenState {
         data object Loading : ScreenState()
         data class Success(val movies: List<Movie>, val total: Int) : ScreenState()
@@ -20,7 +19,6 @@ object MovieListContract {
     )
 
     sealed class Event {
-        data object LoadMovies : Event()
         data class SortChanged(val option: SortOption) : Event()
         data class FiltersApplied(val filters: FilterParams) : Event()
         data class MovieClicked(val movieId: String) : Event()
@@ -31,6 +29,7 @@ object MovieListContract {
     sealed class Effect {
         data class NavigateToDetails(val movieId: String) : Effect()
         data object NavigateToFilter : Effect()
+        data class ShowError(val message: String) : Effect()
     }
 
     enum class SortOption(val apiValue: String, val label: String, var order: SortOrder) {

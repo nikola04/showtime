@@ -39,6 +39,7 @@ fun MovieListScreen(
 ) {
     val viewModel: MovieListViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -47,11 +48,15 @@ fun MovieListScreen(
                     onMovieClick(effect.movieId)
                 is Effect.NavigateToFilter ->
                     onFiltersClick()
+                is Effect.ShowError -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
             }
         }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {

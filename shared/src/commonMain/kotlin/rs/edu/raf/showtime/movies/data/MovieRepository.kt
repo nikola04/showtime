@@ -5,12 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import rs.edu.raf.showtime.core.db.AppDatabase
-import rs.edu.raf.showtime.movies.data.mapper.asDomainMovie
-import rs.edu.raf.showtime.movies.data.mapper.toCollectionEntity
-import rs.edu.raf.showtime.movies.data.mapper.toDomain
-import rs.edu.raf.showtime.movies.data.mapper.toGenreEntity
-import rs.edu.raf.showtime.movies.data.mapper.toMovieEntity
-import rs.edu.raf.showtime.movies.data.mapper.toMovieGenreCrossRefs
+import rs.edu.raf.showtime.movies.data.mapper.*
 import rs.edu.raf.showtime.movies.domain.Genre
 import rs.edu.raf.showtime.movies.domain.Movie
 import rs.edu.raf.showtime.movies.domain.MovieCast
@@ -109,24 +104,66 @@ class MovieRepository(
     }
 
     override suspend fun getCast(imdbId: String): MovieCast {
-        val response = api.getCast(imdbId)
-        return MovieCast(
-            items = response.items.map { it.toDomain() },
-            totalItems = response.totalItems
-        )
+        try {
+            val response = api.getCast(imdbId)
+            val castEntities = response.items.map { it.toEntity(imdbId) }
+            appDatabase.movieDao().deleteCast(imdbId)
+            appDatabase.movieDao().insertCastMembers(castEntities)
+            return MovieCast(
+                items = response.items.map { it.toDomain() },
+                totalItems = response.totalItems
+            )
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Napier.e("Failed to fetch cast from API, falling back to DB", e)
+            val localCast = appDatabase.movieDao().getCast(imdbId)
+            return MovieCast(
+                items = localCast.map { it.toDomain() },
+                totalItems = localCast.size
+            )
+        }
     }
 
     override suspend fun getImages(imdbId: String): MovieImages {
-        val response = api.getImages(imdbId)
-        return MovieImages(
-            backdrops = response.backdrops.map { it.toDomain() },
-            posters = response.posters.map { it.toDomain() },
-            logos = response.logos.map { it.toDomain() }
-        )
+        try {
+            val response = api.getImages(imdbId)
+            val entities = mutableListOf<rs.edu.raf.showtime.movies.db.MovieImageEntity>()
+            entities.addAll(response.backdrops.map { it.toEntity(imdbId, "backdrop") })
+            entities.addAll(response.posters.map { it.toEntity(imdbId, "poster") })
+            entities.addAll(response.logos.map { it.toEntity(imdbId, "logo") })
+
+            appDatabase.movieDao().deleteImages(imdbId)
+            appDatabase.movieDao().insertMovieImages(entities)
+
+            return MovieImages(
+                backdrops = response.backdrops.map { it.toDomain() },
+                posters = response.posters.map { it.toDomain() },
+                logos = response.logos.map { it.toDomain() }
+            )
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Napier.e("Failed to fetch images from API, falling back to DB", e)
+            val localImages = appDatabase.movieDao().getImages(imdbId)
+            return MovieImages(
+                backdrops = localImages.filter { it.type == "backdrop" }.map { it.toDomain() },
+                posters = localImages.filter { it.type == "poster" }.map { it.toDomain() },
+                logos = localImages.filter { it.type == "logo" }.map { it.toDomain() }
+            )
+        }
     }
 
     override suspend fun getVideos(imdbId: String, type: String): List<MovieVideo> {
-        return api.getVideos(imdbId, type).map { it.toDomain() }
+        try {
+            val response = api.getVideos(imdbId, type)
+            val entities = response.map { it.toEntity(imdbId) }
+            appDatabase.movieDao().deleteVideos(imdbId)
+            appDatabase.movieDao().insertMovieVideos(entities)
+            return response.map { it.toDomain() }
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            Napier.e("Failed to fetch videos from API, falling back to DB", e)
+            return appDatabase.movieDao().getVideos(imdbId).map { it.toDomain() }
+        }
     }
 
     override suspend fun refreshMovies() {
@@ -134,7 +171,6 @@ class MovieRepository(
         val totalItems = initialResponse.totalItems
         val localCount = appDatabase.movieDao().getMoviesCount()
 
-        Napier.e("Total: ${totalItems}; Local: $localCount")
         if (totalItems != localCount) {
             val allMovies = mutableListOf<MovieMinDTO>()
             val pageSize = 100

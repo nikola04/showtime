@@ -75,7 +75,6 @@ class MovieDetailsViewModel(
         observeDetailsJob = viewModelScope.launch {
             repository.observeMovieDetails(movieId).collectLatest { movieDetails ->
                 if (movieDetails != null) {
-                    // When we have movie details from DB, we still need cast/images/videos from API
                     fetchExtraData(movieDetails)
                 } else {
                     _state.update { it.copy(screenState = MovieDetailsContract.ScreenState.Loading) }
@@ -127,7 +126,10 @@ class MovieDetailsViewModel(
                 repository.refreshMovieDetails(movieId)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                // If we don't have data in DB yet, show error
+                
+                val errorMessage = e::class.simpleName ?: "Sync failed"
+                _effect.send(MovieDetailsContract.Effect.ShowError(errorMessage))
+
                 if (_state.value.screenState is MovieDetailsContract.ScreenState.Loading) {
                     _state.update { 
                         it.copy(screenState = MovieDetailsContract.ScreenState.Error(e.message ?: "Unknown error")) 

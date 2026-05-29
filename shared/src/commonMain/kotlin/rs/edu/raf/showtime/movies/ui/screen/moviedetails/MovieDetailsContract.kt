@@ -29,5 +29,6 @@ object MovieDetailsContract {
     sealed class Effect {
         data object NavigateBack : Effect()
         data class OpenYoutube(val id: String): Effect()
+        data class ShowError(val message: String) : Effect()
     }
 }
