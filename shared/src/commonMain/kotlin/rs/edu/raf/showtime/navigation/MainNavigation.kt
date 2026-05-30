@@ -58,10 +58,10 @@ fun MainNavigation() {
             popExitTransition = { ExitTransition.None },
         ) {
             moviesGraph(navController)
-            favoritesGraph(navController)
             quizGraph(navController)
-            profileGraph()
             watchlistGraph(navController)
+            favoritesGraph(navController)
+            profileGraph()
         }
     }
 }

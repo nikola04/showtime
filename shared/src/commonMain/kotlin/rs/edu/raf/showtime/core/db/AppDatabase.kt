@@ -7,6 +7,8 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import rs.edu.raf.showtime.favorites.db.FavoritesDao
+import rs.edu.raf.showtime.favorites.db.FavoritesEntity
 import rs.edu.raf.showtime.movies.db.CollectionEntity
 import rs.edu.raf.showtime.movies.db.GenreEntity
 import rs.edu.raf.showtime.movies.db.MovieDao
@@ -27,15 +29,17 @@ import rs.edu.raf.showtime.watchlist.db.WatchlistEntity
         CastMemberEntity::class,
         MovieImageEntity::class,
         MovieVideoEntity::class,
-        WatchlistEntity::class
+        WatchlistEntity::class,
+        FavoritesEntity::class
                ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun movieDao(): MovieDao
     abstract fun watchlistDao(): WatchlistDao
+    abstract fun favoritesDao(): FavoritesDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")

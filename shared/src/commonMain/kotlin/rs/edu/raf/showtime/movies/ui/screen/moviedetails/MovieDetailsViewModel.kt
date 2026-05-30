@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import rs.edu.raf.showtime.favorites.data.FavoritesRepository
 import rs.edu.raf.showtime.movies.data.MovieRepository
 import rs.edu.raf.showtime.movies.domain.MovieDetails
 import rs.edu.raf.showtime.watchlist.data.WatchlistRepository
@@ -21,6 +22,7 @@ import rs.edu.raf.showtime.watchlist.data.WatchlistRepository
 class MovieDetailsViewModel(
     private val movieRepository: MovieRepository,
     private val watchlistRepository: WatchlistRepository,
+    private val favoritesRepository: FavoritesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -87,6 +89,12 @@ class MovieDetailsViewModel(
 
     private fun toggleFavorites(movieId: String) {
         viewModelScope.launch {
+            try {
+                favoritesRepository.toggleMovie(movieId)
+            } catch (e: Exception) {
+                Napier.e("Failed to toggle favorites", e)
+                _effect.send(MovieDetailsContract.Effect.ShowError("Failed to toggle favorite for movie"))
+            }
         }
     }
 
@@ -101,6 +109,21 @@ class MovieDetailsViewModel(
                         if (screenState is MovieDetailsContract.ScreenState.Success) {
                             state.copy(
                                 screenState = screenState.copy(isInWatchlist = isInWatchlist)
+                            )
+                        } else {
+                            state
+                        }
+                    }
+                }
+            }
+
+            launch {
+                favoritesRepository.observeFavoriteMovieState(movieId).collectLatest { isInFavorites ->
+                    _state.update { state ->
+                        val screenState = state.screenState
+                        if (screenState is MovieDetailsContract.ScreenState.Success) {
+                            state.copy(
+                                screenState = screenState.copy(isInFavorites = isInFavorites)
                             )
                         } else {
                             state
@@ -148,6 +171,7 @@ class MovieDetailsViewModel(
         }
 
         val isInWatchlist = watchlistRepository.isMovieInWatchlist(movie.imdbId)
+        val isInFavorites = favoritesRepository.isMovieInFavorite(movie.imdbId)
 
         _state.update {
             it.copy(
@@ -157,7 +181,7 @@ class MovieDetailsViewModel(
                     images = imagesDeferred.await(),
                     trailer = trailerDeferred.await(),
                     isInWatchlist = isInWatchlist,
-                    isFavorite = false
+                    isInFavorites = isInFavorites
                 )
             )
         }

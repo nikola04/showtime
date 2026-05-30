@@ -1,39 +1,25 @@
 package rs.edu.raf.showtime.favorites.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-
-object FavoriteRoutes {
-    data object Favorites {
-        const val route = "favorites"
-    }
-}
+import org.koin.compose.viewmodel.koinViewModel
+import rs.edu.raf.showtime.favorites.ui.screen.FavoritesScreen
+import rs.edu.raf.showtime.favorites.ui.screen.FavoritesViewModel
+import rs.edu.raf.showtime.movies.ui.navigation.MoviesRoutes
 
 fun NavGraphBuilder.favoritesGraph(
-    navController: NavController,
+    navController: NavController
 ) {
     composable(FavoriteRoutes.Favorites.route) {
-        FavoritesPlaceholderScreen()
-    }
-}
+        val viewModel: FavoritesViewModel = koinViewModel()
 
-@Composable
-private fun FavoritesPlaceholderScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Favorite",
-            style = MaterialTheme.typography.headlineSmall,
+        FavoritesScreen(
+            viewModel,
+            onMovieClick = { movieId ->
+                navController.navigate(MoviesRoutes.MovieDetails().createRoute(movieId))
+            }
         )
     }
 }
+

@@ -10,5 +10,10 @@ import rs.edu.raf.showtime.core.auth.model.AuthData
 val coreAuthModule = module {
     single<DataStore<AuthData>> { createAuthDataStore() }
     single<AuthStore> { AuthStore(persistence = get()) }
-    single<UserSessionCleaner> { UserSessionCleaner() }
+    single<UserSessionCleaner> {
+        UserSessionCleaner(
+            watchlistRepository = get(),
+            favoritesRepository = get(),
+        )
+    }
 }
