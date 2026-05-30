@@ -77,4 +77,8 @@ class FavoritesRepository(
             throw e
         }
     }
+
+    override suspend fun emptyFavorites() {
+        appDatabase.favoritesDao().clearFavorites()
+    }
 }

@@ -19,4 +19,6 @@ interface FavoritesRepository {
     suspend fun isMovieInFavorite(id: String): Boolean
 
     suspend fun toggleMovie(id: String)
+
+    suspend fun emptyFavorites()
 }

@@ -22,7 +22,7 @@ data class MainBottomRoute(
 val mainBottomRoutes = listOf(
     MainBottomRoute(
         route = FavoriteRoutes.Favorites.route,
-        label = "Favorite",
+        label = "Favorites",
         icon = Icons.Default.Favorite,
     ),
     MainBottomRoute(

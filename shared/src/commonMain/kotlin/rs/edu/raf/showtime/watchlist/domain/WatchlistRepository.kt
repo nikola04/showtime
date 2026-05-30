@@ -19,4 +19,6 @@ interface WatchlistRepository {
     suspend fun isMovieInWatchlist(id: String): Boolean
 
     suspend fun toggleMovie(id: String)
+
+    suspend fun emptyWatchlist()
 }

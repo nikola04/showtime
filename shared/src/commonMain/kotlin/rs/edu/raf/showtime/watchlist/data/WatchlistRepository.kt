@@ -77,4 +77,10 @@ class WatchlistRepository(
             throw e
         }
     }
+
+    override suspend fun emptyWatchlist() {
+        appDatabase.watchlistDao().clearWatchlist()
+    }
+
+
 }
