@@ -32,14 +32,14 @@ class GuessActorGenerator : QuestionGenerator {
 
             if (wrong.size < 3) continue
 
-            questions += QuizQuestion(
+            questions.add(QuizQuestion(
                 id = movie.imdbId,
                 type = QuestionType.GUESS_LEAD_ACTOR,
                 correctAnswer = correct,
                 answers = QuizAnswerUtils.buildAnswers(correct, wrong),
                 imageUrl = movie.posterPath,
                 movieTitle = movie.title
-            )
+            ))
         }
 
         return questions

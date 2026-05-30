@@ -12,27 +12,18 @@ class QuizRepository(
 
         return movies.map { movie ->
 
-            val cast = try {
-                appDatabase.movieDao()
-                    .getCast(movie.imdbId)
-                    .map { it.name }
-            } catch (_: Exception) {
-                emptyList()
-            }
-
-            val images = try {
-                appDatabase.movieDao()
-                    .getImages(movie.imdbId)
-            } catch (_: Exception) {
-                emptyList()
-            }
+            val cast = appDatabase.movieDao()
+                .getCast(movie.imdbId)
+                .map { it.name.trim() }
+                .filter { it.isNotBlank() }
+                .distinct()
 
             QuizMovie(
                 imdbId = movie.imdbId,
                 title = movie.title,
                 year = movie.year,
-                posterPath = images.firstOrNull { it.type == "poster" }?.filePath,
-                backdropPath = images.firstOrNull { it.type == "backdrop" }?.filePath,
+                posterPath = movie.posterPath,
+                backdropPath = movie.backdropPath,
                 cast = cast
             )
         }

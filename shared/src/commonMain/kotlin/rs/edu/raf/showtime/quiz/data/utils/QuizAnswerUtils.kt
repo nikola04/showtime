@@ -44,6 +44,8 @@ object QuizAnswerUtils {
         return movies
             .filter { it.imdbId != excludeId }
             .flatMap { it.cast }
+            .map(String::trim)
+            .filter { it.isNotBlank() }
             .distinct()
             .filter { it != correct }
             .shuffled()

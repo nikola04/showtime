@@ -48,6 +48,6 @@ class QuizHomeViewModel(
     }
 
     private fun isValidQuizPool(pool: List<QuizMovie>): Boolean {
-        return pool.count { it.posterPath != null } >= 10
+        return pool.count { !it.posterPath.isNullOrBlank() } >= 10
     }
 }
