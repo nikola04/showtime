@@ -10,7 +10,7 @@ object MovieDetailsContract {
         data object Loading : ScreenState()
         data class Success(
             val movie: MovieDetails,
-            val isFavorite: Boolean = false,
+            val isInFavorites: Boolean = false,
             val isInWatchlist: Boolean = false,
             val cast: List<CastMember> = emptyList(),
             val images: List<MovieImage> = emptyList(),

@@ -13,6 +13,7 @@ import rs.edu.raf.showtime.network.AuthAPI
 import rs.edu.raf.showtime.core.auth.AuthStore
 import rs.edu.raf.showtime.core.auth.UserSessionCleaner
 import rs.edu.raf.showtime.core.auth.model.AuthState
+import rs.edu.raf.showtime.network.FavoritesAPI
 import rs.edu.raf.showtime.network.HttpClientFactory
 import rs.edu.raf.showtime.network.MovieAPI
 import rs.edu.raf.showtime.network.ProfileAPI
@@ -21,12 +22,14 @@ import rs.edu.raf.showtime.network.createAuthAPI
 import rs.edu.raf.showtime.network.createMovieAPI
 import rs.edu.raf.showtime.network.createProfileAPI
 import rs.edu.raf.showtime.network.createWatchlistAPI
+import rs.edu.raf.showtime.network.createFavoritesAPI
 
 val networkModule = module {
     single<MovieAPI> { get<Ktorfit>().createMovieAPI() }
     single<AuthAPI> { get<Ktorfit>().createAuthAPI() }
     single<ProfileAPI> { get<Ktorfit>(Qualifiers.Authenticated).createProfileAPI() }
     single<WatchlistAPI> { get<Ktorfit>(Qualifiers.Authenticated).createWatchlistAPI() }
+    single<FavoritesAPI> { get<Ktorfit>(Qualifiers.Authenticated).createFavoritesAPI() }
 
     single<HttpClient> {
         HttpClientFactory.createHttpClient()

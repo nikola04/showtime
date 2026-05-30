@@ -219,7 +219,7 @@ fun MovieDetailsScreen(
                         }
                         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                             MovieActions(
-                                isFavorite = screenState.isFavorite,
+                                isFavorite = screenState.isInFavorites,
                                 isWatchlist = screenState.isInWatchlist,
                                 onFavoriteClick = {
                                     viewModel.onEvent(MovieDetailsContract.Event.ToggleFavorite)
