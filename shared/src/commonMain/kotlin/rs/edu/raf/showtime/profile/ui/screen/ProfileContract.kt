@@ -11,8 +11,8 @@ object ProfileContract {
 
     data class State(
         val screenState: ScreenState = ScreenState.Loading,
-        val favoriteCount: Int = 0,
-        val watchlistCount: Int = 0,
+        val favoriteCount: Long = 0,
+        val watchlistCount: Long = 0,
         val quizGamesPlayed: Int = 0,
         val bestQuizScore: Float = 0f
     )

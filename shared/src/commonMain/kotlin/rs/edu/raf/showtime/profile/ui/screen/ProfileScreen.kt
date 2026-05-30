@@ -3,6 +3,7 @@ package rs.edu.raf.showtime.profile.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +42,8 @@ fun ProfileScreen(
         }
     ) { padding ->
             Box(modifier = Modifier.fillMaxSize()) {
+                val watchlistCount = state.watchlistCount
+                val favoritesCount = state.favoriteCount
                 when (val screenState = state.screenState) {
                     is ProfileContract.ScreenState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -66,6 +69,7 @@ fun ProfileScreen(
                     ) {
                         Column {
                             ProfileDetails(screenState.profile)
+                            LibraryStats(favoritesCount, watchlistCount)
                         }
 
                         Button(
@@ -76,6 +80,44 @@ fun ProfileScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun LibraryStats(
+    favoritesCount: Long,
+    watchlistCount: Long
+) {
+    Row(
+        modifier = Modifier.padding(vertical = 24.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text("Watchlisted:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
+            Text(watchlistCount.toString(), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    "Favorites:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f)
+                )
+                Text(
+                    favoritesCount.toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
         }
     }
