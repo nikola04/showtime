@@ -226,6 +226,9 @@ interface MovieDao {
         minRating: Float? = null,
     ): Flow<List<MovieDetailed>>
 
+    @Query("SELECT * FROM movies")
+    suspend fun getAllMovies(): List<MovieEntity>
+
     // GENRES
 
     @Query("SELECT * FROM cast_members WHERE imdbId = :imdbId")
