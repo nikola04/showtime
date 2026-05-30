@@ -3,6 +3,7 @@ package rs.edu.raf.showtime.movies.ui.screen.moviedetails
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -75,7 +76,12 @@ class MovieDetailsViewModel(
 
     private fun toggleWatchlist(movieId: String) {
         viewModelScope.launch {
-            watchlistRepository.toggleMovie(movieId)
+            try {
+                watchlistRepository.toggleMovie(movieId)
+            } catch (e: Exception) {
+                Napier.e("Failed to toggle watchlist", e)
+                _effect.send(MovieDetailsContract.Effect.ShowError("Failed to toggle watchlist for movie"))
+            }
         }
     }
 

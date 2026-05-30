@@ -43,8 +43,8 @@ class WatchlistViewModel(
             try {
                 repository.toggleMovie(movieId)
             } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                _effect.send(WatchlistContract.Effect.ShowError("Failed to update watchlist"))
+                Napier.e("Failed to toggle watchlist", e)
+                _effect.send(WatchlistContract.Effect.ShowError("Failed to toggle watchlist for movie"))
             }
         }
     }
@@ -77,9 +77,8 @@ class WatchlistViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Napier.d("Failed to sync watchlist")
-                val errorMessage = e::class.simpleName ?: "Sync failed"
-                _effect.send(WatchlistContract.Effect.ShowError(errorMessage))
+                Napier.d("Failed to sync watchlist", e)
+                _effect.send(WatchlistContract.Effect.ShowError("Failed to sync watchlist"))
 
                 if (!hasCachedData)
                     _state.update {

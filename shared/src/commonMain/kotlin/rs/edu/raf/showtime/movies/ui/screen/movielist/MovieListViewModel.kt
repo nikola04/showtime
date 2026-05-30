@@ -112,8 +112,7 @@ class MovieListViewModel(
             } catch (e: Exception) {
                 Napier.e("Failed to sync movies", e)
                 
-                val errorMessage = e::class.simpleName ?: "Sync failed"
-                _effect.send(ShowError(errorMessage))
+                _effect.send(ShowError("Failed to sync movies"))
 
                 if (!hasCachedData)
                     _state.update {

@@ -68,11 +68,13 @@ class WatchlistRepository(
             if (wasInWatchlist) {
                 api.removeFromWatchlist(id)
             } else api.addToWatchlist(id)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Rollback if network fails
             if (wasInWatchlist) {
                 appDatabase.watchlistDao().addToWatchlist(WatchlistEntity(id))
             } else appDatabase.watchlistDao().removeFromWatchlist(id)
+
+            throw e
         }
     }
 }
