@@ -3,12 +3,16 @@ package rs.edu.raf.showtime.quiz.ui.screen.quiz
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import rs.edu.raf.showtime.quiz.data.QuizGeneratorImpl
+import rs.edu.raf.showtime.quiz.domain.QuizResult
 
 class QuizViewModel(
     private val quizGenerator: QuizGeneratorImpl
@@ -16,6 +20,9 @@ class QuizViewModel(
 
     private val _state = MutableStateFlow(QuizContract.State())
     val state = _state.asStateFlow()
+
+    private val _effect = Channel<QuizContract.Effect>()
+    private val effect = _effect.receiveAsFlow()
 
     private var timerJob: Job? = null
 
@@ -25,30 +32,36 @@ class QuizViewModel(
 
     private fun startQuiz() {
         viewModelScope.launch {
-            val session = quizGenerator.generateQuiz()
+            timerJob?.cancel()
 
-            _state.update {
-                it.copy(
-                    session = session,
-                    currentQuestion = session.questions.firstOrNull(),
-                    currentIndex = 0,
-                    timeLeft = 60
-                )
+            _state.value = QuizContract.State(
+                screenState = QuizContract.ScreenState.Loading
+            )
+
+            try {
+                val session = quizGenerator.generateQuiz()
+
+                _state.update {
+                    it.copy(
+                        screenState = QuizContract.ScreenState.Success,
+                        session = session,
+                        currentQuestion = session.questions.firstOrNull(),
+                        currentIndex = 0,
+                        timeLeft = 60
+                    )
+                }
+
+                startTimer()
+            } catch (e: Exception) {
+                _state.update { it.copy(screenState = QuizContract.ScreenState.Error(e.message.toString())) }
             }
-
-            startTimer()
         }
     }
-
 
     fun onEvent(event: QuizContract.Event) {
         when (event) {
 
             is QuizContract.Event.AnswerSelected -> handleAnswer(event.answer)
-
-            QuizContract.Event.NextQuestion -> goNext()
-
-            QuizContract.Event.Tick -> tick()
 
             QuizContract.Event.ExitClicked -> {
                 _state.update { it.copy(showExitDialog = true) }
@@ -59,8 +72,10 @@ class QuizViewModel(
             }
 
             QuizContract.Event.ExitConfirmed -> {
-                timerJob?.cancel()
-                _state.update { it.copy(isFinished = true) }
+                viewModelScope.launch {
+                    timerJob?.cancel()
+                    _effect.send(QuizContract.Effect.NavigateBack)
+                }
             }
 
             QuizContract.Event.StartQuiz -> startQuiz()
@@ -78,13 +93,13 @@ class QuizViewModel(
             it.copy(
                 selectedAnswer = answer,
                 isAnswered = true,
-                correctCount = if (isCorrect) it.correctCount + 1 else it.correctCount,
-                wrongCount = if (!isCorrect) it.wrongCount + 1 else it.wrongCount
+                correctCount = it.correctCount + if (isCorrect) 1 else 0,
+                wrongCount = it.wrongCount + if (!isCorrect) 1 else 0
             )
         }
 
         viewModelScope.launch {
-            delay(800) // show correct/wrong highlight
+            delay(1000)
             goNext()
         }
     }
@@ -125,18 +140,33 @@ class QuizViewModel(
 
     private fun finishQuiz() {
         timerJob?.cancel()
-        _state.update { it.copy(isFinished = true) }
-    }
 
-    // ---------------- TIMER ----------------
+        val correct = _state.value.correctCount
+        val wrong = _state.value.wrongCount
+        val total = correct + wrong
+
+        val result = QuizResult(
+            correctAnswers = correct,
+            wrongAnswers = wrong,
+            totalQuestions = total,
+            scorePercent = if (total > 0) correct * 100 / total else 0,
+            durationSeconds = 60 - _state.value.timeLeft
+        )
+
+        _state.update {
+            it.copy(
+                screenState = QuizContract.ScreenState.Finished(result),
+            )
+        }
+    }
 
     private fun startTimer() {
         timerJob?.cancel()
 
         timerJob = viewModelScope.launch {
-            while (true) {
+            while (isActive) {
                 delay(1000)
-                onEvent(QuizContract.Event.Tick)
+                tick()
             }
         }
     }
