@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,11 +35,28 @@ import rs.edu.raf.showtime.quiz.domain.QuestionType
 import rs.edu.raf.showtime.quiz.domain.QuizQuestion
 import rs.edu.raf.showtime.quiz.ui.screen.quiz.components.AnswerButton
 
+
 @Composable
 fun QuizScreen(
-    viewModel: QuizViewModel
+    viewModel: QuizViewModel,
+    navigateBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is QuizContract.Effect.NavigateBack -> navigateBack()
+            }
+        }
+    }
+
+    if (state.showExitDialog) {
+        ExitAlertDialog(
+            onConfirm = { viewModel.onEvent(QuizContract.Event.ExitConfirmed) },
+            onCancel = { viewModel.onEvent(QuizContract.Event.ExitCancelled) }
+        )
+    }
 
     Scaffold { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
@@ -81,20 +102,33 @@ fun QuizScreen(
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Button(
+                                onClick = {
+                                    viewModel.onEvent(QuizContract.Event.ExitClicked)
+                                }
+                            ) {
+                                Text("Back")
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Question ${state.currentIndex + 1} of 10",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
 
-                            Text(
-                                text = "Question ${state.currentIndex + 1} of 10",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            Text(
-                                text = "${state.timeLeft}s",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                                Text(
+                                    text = "${state.timeLeft}s",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
 
                         Spacer(Modifier.height(12.dp))
@@ -159,6 +193,32 @@ fun QuizScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ExitAlertDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm
+            ) {
+                Text("Exit")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onCancel
+            ) {
+                Text("Cancel")
+            }
+        },
+        title = { Text("Exit quiz?") },
+        text = { Text("Your progress will be lost.") }
+    )
 }
 
 @Composable

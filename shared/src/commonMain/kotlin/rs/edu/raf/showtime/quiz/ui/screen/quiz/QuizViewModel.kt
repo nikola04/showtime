@@ -22,7 +22,7 @@ class QuizViewModel(
     val state = _state.asStateFlow()
 
     private val _effect = Channel<QuizContract.Effect>()
-    private val effect = _effect.receiveAsFlow()
+    val effect = _effect.receiveAsFlow()
 
     private var timerJob: Job? = null
 
@@ -143,7 +143,7 @@ class QuizViewModel(
 
         val correct = _state.value.correctCount
         val wrong = _state.value.wrongCount
-        val total = correct + wrong
+        val total = _state.value.session?.questions?.size ?: (correct + wrong)
 
         val result = QuizResult(
             correctAnswers = correct,

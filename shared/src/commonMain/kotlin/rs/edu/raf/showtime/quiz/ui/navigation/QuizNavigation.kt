@@ -23,6 +23,8 @@ fun NavGraphBuilder.quizGraph(
     composable(QuizRoutes.QuizPlay.route) {
         val viewModel: QuizViewModel = koinViewModel()
 
-        QuizScreen(viewModel)
+        QuizScreen(viewModel, navigateBack = {
+            navController.navigate(QuizRoutes.QuizHome.route)
+        })
     }
 }

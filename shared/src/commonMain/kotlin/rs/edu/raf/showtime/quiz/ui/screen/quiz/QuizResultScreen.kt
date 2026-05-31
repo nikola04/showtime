@@ -35,7 +35,7 @@ fun QuizResultScreen(
         ) {
 
             Text(
-                text = "Quiz Finished 🎉",
+                text = "Quiz Finished!",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
