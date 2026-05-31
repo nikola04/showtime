@@ -77,6 +77,13 @@ interface MovieDao {
     """)
     suspend fun getMovieDetails(id: String): MovieDetailed?
 
+    @Query("""
+        SELECT imdbId
+        FROM movies
+        LIMIT :limit
+    """)
+    suspend fun getMovieIds(limit: Int): List<String>
+
     @Transaction
     @Query("""
         SELECT * FROM movies

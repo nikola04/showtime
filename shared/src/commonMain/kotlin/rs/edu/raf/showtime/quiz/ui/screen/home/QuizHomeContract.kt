@@ -4,7 +4,7 @@ object QuizHomeContract {
     sealed class ScreenState {
         data object Loading : ScreenState()
         data object Success : ScreenState()
-        data object NotEnoughMovies : ScreenState()
+        data class NotEnoughMovies(val syncing: Boolean = false) : ScreenState()
         data class Error(val message: String) : ScreenState()
     }
 
@@ -15,6 +15,7 @@ object QuizHomeContract {
 
     sealed class Event {
         data object StartQuizClicked : Event()
+        data object SyncMovies : Event()
     }
 
     sealed class Effect {

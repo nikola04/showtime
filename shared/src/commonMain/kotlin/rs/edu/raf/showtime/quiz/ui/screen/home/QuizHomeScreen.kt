@@ -72,12 +72,14 @@ fun QuizHomeScreen(
                 }
 
                 is QuizHomeContract.ScreenState.NotEnoughMovies -> {
+                    val syncing = screenState.syncing
+
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                "Not enough movies to start :(",
+                                "Not enough movies",
                                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -85,6 +87,13 @@ fun QuizHomeScreen(
                                 "Browse the catalog first to populate your quiz pool.",
                                 style = MaterialTheme.typography.bodySmall
                             )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = { viewModel.onEvent(QuizHomeContract.Event.SyncMovies) },
+                                enabled = !syncing
+                            ) {
+                                Text(text = (if(syncing) "Syncing" else "Sync"))
+                            }
                         }
                     }
                 }

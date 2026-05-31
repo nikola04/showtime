@@ -85,7 +85,7 @@ fun ProfileScreen(
                             LibraryStats(
                                 "Best Score:",
                                 "Total Games:",
-                                bestQuizScore.toString(),
+                                bestQuizScore?.toString() ?: "N/A",
                                 totalQuizGames.toString()
                             )
                         }

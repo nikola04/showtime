@@ -1,6 +1,9 @@
 package rs.edu.raf.showtime.movies.data
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -70,6 +73,10 @@ class MovieRepository(
     override suspend fun getMoviesCount(): Int {
         return appDatabase.movieDao()
             .getMoviesCount()
+    }
+
+    override suspend fun getMoviesIds(limit: Int): List<String> {
+        return appDatabase.movieDao().getMovieIds(limit)
     }
 
     override fun observeGenres(): Flow<List<Genre>> =
@@ -219,6 +226,17 @@ class MovieRepository(
         }
 
         return max(totalItems, localCount)
+    }
+
+    override suspend fun syncMovies(ids: List<String>) = coroutineScope {
+        ids.chunked(10).forEach { batch ->
+            batch.map { id -> async {
+                runCatching {
+                    getCast(id)
+                    getImages(id)
+                }
+            } }.awaitAll()
+        }
     }
 
     override suspend fun refreshMovieDetails(
