@@ -77,6 +77,13 @@ interface MovieDao {
     """)
     suspend fun getMovieDetails(id: String): MovieDetailed?
 
+    @Query("""
+        SELECT imdbId
+        FROM movies
+        LIMIT :limit
+    """)
+    suspend fun getMovieIds(limit: Int): List<String>
+
     @Transaction
     @Query("""
         SELECT * FROM movies
@@ -225,6 +232,9 @@ interface MovieDao {
         maxYear: Int? = null,
         minRating: Float? = null,
     ): Flow<List<MovieDetailed>>
+
+    @Query("SELECT * FROM movies")
+    suspend fun getAllMovies(): List<MovieEntity>
 
     // GENRES
 

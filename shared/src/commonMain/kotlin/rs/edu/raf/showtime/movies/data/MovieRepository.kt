@@ -1,6 +1,9 @@
 package rs.edu.raf.showtime.movies.data
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -16,6 +19,7 @@ import rs.edu.raf.showtime.movies.domain.MovieRepository
 import rs.edu.raf.showtime.movies.domain.MovieVideo
 import rs.edu.raf.showtime.network.MovieAPI
 import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
+import kotlin.math.max
 
 class MovieRepository(
     private val appDatabase: AppDatabase,
@@ -69,6 +73,10 @@ class MovieRepository(
     override suspend fun getMoviesCount(): Int {
         return appDatabase.movieDao()
             .getMoviesCount()
+    }
+
+    override suspend fun getMoviesIds(limit: Int): List<String> {
+        return appDatabase.movieDao().getMovieIds(limit)
     }
 
     override fun observeGenres(): Flow<List<Genre>> =
@@ -182,7 +190,7 @@ class MovieRepository(
         }
     }
 
-    override suspend fun refreshMovies() {
+    override suspend fun refreshMovies(): Int {
         val initialResponse = api.getMovies(page = 1, pageSize = 30)
         val totalItems = initialResponse.totalItems
         val localCount = appDatabase.movieDao().getMoviesCount()
@@ -215,6 +223,19 @@ class MovieRepository(
                 genres = genres,
                 refs = refs,
             )
+        }
+
+        return max(totalItems, localCount)
+    }
+
+    override suspend fun syncMovies(ids: List<String>) = coroutineScope {
+        ids.chunked(10).forEach { batch ->
+            batch.map { id -> async {
+                runCatching {
+                    getCast(id)
+                    getImages(id)
+                }
+            } }.awaitAll()
         }
     }
 

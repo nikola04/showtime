@@ -3,7 +3,6 @@ package rs.edu.raf.showtime.profile.ui.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import rs.edu.raf.showtime.profile.domain.User
+import rs.edu.raf.showtime.profile.ui.components.Heading
+import rs.edu.raf.showtime.profile.ui.components.LibraryStats
+import rs.edu.raf.showtime.profile.ui.components.ProfileDetails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,9 @@ fun ProfileScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 val watchlistCount = state.watchlistCount
                 val favoritesCount = state.favoriteCount
+                val bestQuizScore = state.bestQuizScore
+                val totalQuizGames = state.quizGamesPlayed
+
                 when (val screenState = state.screenState) {
                     is ProfileContract.ScreenState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -68,8 +72,22 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
+                            Heading("Details")
                             ProfileDetails(screenState.profile)
-                            LibraryStats(favoritesCount, watchlistCount)
+                            Heading("Library")
+                            LibraryStats(
+                                "Favorites:",
+                                "In Watchlist:",
+                                favoritesCount.toString(),
+                                watchlistCount.toString()
+                            )
+                            Heading("Quiz")
+                            LibraryStats(
+                                "Best Score:",
+                                "Total Games:",
+                                bestQuizScore?.toString() ?: "N/A",
+                                totalQuizGames.toString()
+                            )
                         }
 
                         Button(
@@ -81,66 +99,6 @@ fun ProfileScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun LibraryStats(
-    favoritesCount: Long,
-    watchlistCount: Long
-) {
-    Row(
-        modifier = Modifier.padding(vertical = 24.dp).fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text("Watchlisted:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
-            Text(watchlistCount.toString(), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    "Favorites:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f)
-                )
-                Text(
-                    favoritesCount.toString(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ProfileDetails(profile: User) {
-    Column(
-        modifier = Modifier.padding(vertical = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text("Full Name:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
-            Text(profile.fullName, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
-        }
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text("Username:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
-            Text(profile.username, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }

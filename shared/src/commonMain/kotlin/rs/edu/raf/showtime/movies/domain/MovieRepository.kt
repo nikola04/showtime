@@ -21,6 +21,8 @@ interface MovieRepository {
 
     suspend fun getMoviesCount(): Int
 
+    suspend fun getMoviesIds(limit: Int): List<String>
+
     fun observeGenres(): Flow<List<Genre>>
 
     suspend fun getGenres(): List<Genre>
@@ -43,7 +45,9 @@ interface MovieRepository {
 
     suspend fun getVideos(imdbId: String, type: String = "Trailer"): List<MovieVideo>
 
-    suspend fun refreshMovies()
+    suspend fun refreshMovies(): Int
+
+    suspend fun syncMovies(ids: List<String>)
 
     suspend fun refreshMovieDetails(imdbId: String)
 
