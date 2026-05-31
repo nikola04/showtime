@@ -43,7 +43,7 @@ interface MovieRepository {
 
     suspend fun getVideos(imdbId: String, type: String = "Trailer"): List<MovieVideo>
 
-    suspend fun refreshMovies()
+    suspend fun refreshMovies(): Int
 
     suspend fun refreshMovieDetails(imdbId: String)
 

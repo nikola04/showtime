@@ -16,6 +16,7 @@ import rs.edu.raf.showtime.movies.domain.MovieRepository
 import rs.edu.raf.showtime.movies.domain.MovieVideo
 import rs.edu.raf.showtime.network.MovieAPI
 import rs.edu.raf.showtime.network.model.movies.MovieMinDTO
+import kotlin.math.max
 
 class MovieRepository(
     private val appDatabase: AppDatabase,
@@ -182,7 +183,7 @@ class MovieRepository(
         }
     }
 
-    override suspend fun refreshMovies() {
+    override suspend fun refreshMovies(): Int {
         val initialResponse = api.getMovies(page = 1, pageSize = 30)
         val totalItems = initialResponse.totalItems
         val localCount = appDatabase.movieDao().getMoviesCount()
@@ -216,6 +217,8 @@ class MovieRepository(
                 refs = refs,
             )
         }
+
+        return max(totalItems, localCount)
     }
 
     override suspend fun refreshMovieDetails(

@@ -44,6 +44,9 @@ fun ProfileScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 val watchlistCount = state.watchlistCount
                 val favoritesCount = state.favoriteCount
+                val bestQuizScore = state.bestQuizScore
+                val totalQuizGames = state.quizGamesPlayed
+
                 when (val screenState = state.screenState) {
                     is ProfileContract.ScreenState.Loading -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -69,7 +72,8 @@ fun ProfileScreen(
                     ) {
                         Column {
                             ProfileDetails(screenState.profile)
-                            LibraryStats(favoritesCount, watchlistCount)
+                            LibraryStats("Favorites:", "In Watchlist:",favoritesCount.toString(), watchlistCount.toString())
+                            LibraryStats("Best Score:", "Total Games:", bestQuizScore.toString(), totalQuizGames.toString())
                         }
 
                         Button(
@@ -87,8 +91,10 @@ fun ProfileScreen(
 
 @Composable
 fun LibraryStats(
-    favoritesCount: Long,
-    watchlistCount: Long
+    firstName: String,
+    secondName: String,
+    firstCount: String,
+    secondCount: String
 ) {
     Row(
         modifier = Modifier.padding(vertical = 24.dp).fillMaxWidth(),
@@ -97,8 +103,8 @@ fun LibraryStats(
         Column(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text("Watchlisted:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
-            Text(watchlistCount.toString(), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+            Text(firstName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f))
+            Text(firstCount, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
         }
 
         Row(
@@ -109,12 +115,12 @@ fun LibraryStats(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    "Favorites:",
+                    secondName,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f)
                 )
                 Text(
-                    favoritesCount.toString(),
+                    secondCount,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )

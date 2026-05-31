@@ -1,11 +1,13 @@
 package rs.edu.raf.showtime.quiz.domain
 
+import kotlinx.coroutines.flow.Flow
+
 interface QuizRepository {
     suspend fun getQuizMoviesPool(): List<QuizMovie>
 
-//    suspend fun saveQuizAttempt(
-//        attempt: QuizAttempt
-//    )
+    suspend fun saveQuizResult(quizResult: QuizResult)
 
-//    suspend fun getQuizAttempts(): List<QuizAttempt>
+    fun observeBestQuizResult(): Flow<QuizResult?>
+
+    fun observeTotalQuizResults(): Flow<Long>
 }

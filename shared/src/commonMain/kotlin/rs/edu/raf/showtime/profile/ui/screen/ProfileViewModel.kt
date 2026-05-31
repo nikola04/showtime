@@ -12,6 +12,7 @@ import rs.edu.raf.showtime.core.auth.AuthStore
 import rs.edu.raf.showtime.core.auth.UserSessionCleaner
 import rs.edu.raf.showtime.favorites.data.FavoritesRepository
 import rs.edu.raf.showtime.profile.data.ProfileRepository
+import rs.edu.raf.showtime.quiz.data.QuizRepository
 import rs.edu.raf.showtime.watchlist.data.WatchlistRepository
 
 class ProfileViewModel(
@@ -19,7 +20,8 @@ class ProfileViewModel(
     private val userSessionCleaner: UserSessionCleaner,
     private val profileRepository: ProfileRepository,
     private val watchlistRepository: WatchlistRepository,
-    private val favoritesRepository: FavoritesRepository
+    private val favoritesRepository: FavoritesRepository,
+    private val quizRepository: QuizRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(ProfileContract.State())
     val state = _state.asStateFlow()
@@ -47,7 +49,16 @@ class ProfileViewModel(
                 _state.update { it.copy(favoriteCount = count) }
             }
         }
-        // TODO: Observe quiz stats when implemented
+        viewModelScope.launch {
+            quizRepository.observeBestQuizResult().collectLatest { bestResult ->
+                _state.update { it.copy(bestQuizScore = bestResult?.score )}
+            }
+        }
+        viewModelScope.launch {
+            quizRepository.observeTotalQuizResults().collectLatest { total ->
+                _state.update { it.copy(quizGamesPlayed = total) }
+            }
+        }
     }
 
     private fun loadProfile() {

@@ -216,7 +216,7 @@ private fun ExitAlertDialog(
                 Text("Cancel")
             }
         },
-        title = { Text("Exit quiz?") },
+        title = { Text("Abandon quiz?") },
         text = { Text("Your progress will be lost.") }
     )
 }

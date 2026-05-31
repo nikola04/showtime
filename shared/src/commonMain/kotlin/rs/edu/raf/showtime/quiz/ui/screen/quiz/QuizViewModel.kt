@@ -11,11 +11,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import rs.edu.raf.showtime.core.util.NumberUtils
 import rs.edu.raf.showtime.quiz.data.QuizGeneratorImpl
+import rs.edu.raf.showtime.quiz.data.QuizRepository
 import rs.edu.raf.showtime.quiz.domain.QuizResult
 
 class QuizViewModel(
-    private val quizGenerator: QuizGeneratorImpl
+    private val quizGenerator: QuizGeneratorImpl,
+    private val quizRepository: QuizRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(QuizContract.State())
@@ -128,7 +131,7 @@ class QuizViewModel(
     private fun tick() {
         val time = _state.value.timeLeft
 
-        if (time <= 1) {
+        if (time <= 0) {
             finishQuiz()
             return
         }
@@ -143,21 +146,43 @@ class QuizViewModel(
 
         val correct = _state.value.correctCount
         val wrong = _state.value.wrongCount
+
         val total = _state.value.session?.questions?.size ?: (correct + wrong)
+        val timeLeft = _state.value.timeLeft
+
+        val score = calculateScore(correct, timeLeft)
 
         val result = QuizResult(
             correctAnswers = correct,
             wrongAnswers = wrong,
             totalQuestions = total,
-            scorePercent = if (total > 0) correct * 100 / total else 0,
-            durationSeconds = 60 - _state.value.timeLeft
+            score = NumberUtils.clamp2Decimals(score),
+            durationSeconds = 60 - timeLeft
         )
+
+        viewModelScope.launch {
+            quizRepository.saveQuizResult(result)
+        }
 
         _state.update {
             it.copy(
-                screenState = QuizContract.ScreenState.Finished(result),
+                screenState = QuizContract.ScreenState.Finished(result)
             )
         }
+    }
+
+    private fun calculateScore(
+        correct: Int,
+        timeLeft: Int
+    ): Double {
+
+        val mvt = 60.0
+        val pvt = timeLeft.toDouble()
+        val bto = correct.toDouble()
+
+        val ubp = bto * (9.0 + (pvt / mvt))
+
+        return ubp.coerceAtMost(100.0)
     }
 
     private fun startTimer() {

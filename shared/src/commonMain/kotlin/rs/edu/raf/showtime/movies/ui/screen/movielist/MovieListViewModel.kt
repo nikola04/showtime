@@ -104,8 +104,14 @@ class MovieListViewModel(
                     }
 
                 Napier.d("Starting movie sync...")
-                repository.refreshMovies()
+                val latestCount = repository.refreshMovies()
                 Napier.d("Movie sync completed successfully")
+
+                if (!hasCachedData && latestCount == 0) { // in other cases it will be called through observer
+                    _state.update {
+                        it.copy(screenState = MovieListContract.ScreenState.Empty)
+                    }
+                }
             } catch (e: CancellationException) {
                 Napier.d("Movie sync cancelled")
                 throw e

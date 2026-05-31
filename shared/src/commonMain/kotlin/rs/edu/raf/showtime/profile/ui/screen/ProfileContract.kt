@@ -13,8 +13,8 @@ object ProfileContract {
         val screenState: ScreenState = ScreenState.Loading,
         val favoriteCount: Long = 0,
         val watchlistCount: Long = 0,
-        val quizGamesPlayed: Int = 0,
-        val bestQuizScore: Float = 0f
+        val quizGamesPlayed: Long = 0,
+        val bestQuizScore: Double? = null,
     )
 
     sealed class Event {

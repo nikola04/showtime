@@ -4,6 +4,6 @@ data class QuizResult(
     val correctAnswers: Int,
     val wrongAnswers: Int,
     val totalQuestions: Int,
-    val scorePercent: Int,
+    val score: Double,
     val durationSeconds: Int
 )

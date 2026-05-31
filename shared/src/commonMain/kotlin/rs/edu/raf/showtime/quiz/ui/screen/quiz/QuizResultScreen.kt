@@ -43,7 +43,7 @@ fun QuizResultScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "${result.scorePercent}%",
+                text = "${result.score}/100",
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -51,7 +51,7 @@ fun QuizResultScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "Correct answers: ${result.correctAnswers}",
+                text = "Correct: ${result.correctAnswers} / ${result.totalQuestions}",
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -65,7 +65,7 @@ fun QuizResultScreen(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Time: ${result.durationSeconds}s",
+                text = "Duration: ${result.durationSeconds}s",
                 style = MaterialTheme.typography.bodyLarge
             )
 
