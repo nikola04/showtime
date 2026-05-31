@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.map
 import rs.edu.raf.showtime.core.db.AppDatabase
 import rs.edu.raf.showtime.quiz.data.mappers.toDomain
 import rs.edu.raf.showtime.quiz.data.mappers.toEntity
+import rs.edu.raf.showtime.quiz.data.mappers.toQuizMovie
 import rs.edu.raf.showtime.quiz.domain.QuizMovie
 import rs.edu.raf.showtime.quiz.domain.QuizRepository
 import rs.edu.raf.showtime.quiz.domain.QuizResult
@@ -16,21 +17,13 @@ class QuizRepository(
         val movies = appDatabase.movieDao().getAllMovies()
 
         return movies.map { movie ->
-
             val cast = appDatabase.movieDao()
                 .getCast(movie.imdbId)
                 .map { it.name.trim() }
                 .filter { it.isNotBlank() }
                 .distinct()
 
-            QuizMovie(
-                imdbId = movie.imdbId,
-                title = movie.title,
-                year = movie.year,
-                posterPath = movie.posterPath,
-                backdropPath = movie.backdropPath,
-                cast = cast
-            )
+            movie.toQuizMovie(cast)
         }
     }
 

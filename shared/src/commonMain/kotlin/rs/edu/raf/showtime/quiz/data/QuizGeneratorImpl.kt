@@ -7,22 +7,24 @@ class QuizGeneratorImpl(
     private val repository: QuizRepository
 ) : QuizGenerator {
 
-    private val generators: List<QuestionGenerator> = listOf(
+    private val movieKnowledgeGenerators: List<QuestionGenerator> = listOf(
         GuessMovieGenerator(),
         GuessYearGenerator(),
         GuessActorGenerator()
     )
 
-    override suspend fun generateQuiz(): QuizSession {
+    private fun getGenerators(category: QuizCategory): List<QuestionGenerator> {
+        return when(category) {
+            QuizCategory.MovieKnowledge -> movieKnowledgeGenerators
+        }
+    }
 
+    override suspend fun generateQuiz(category: QuizCategory): QuizSession {
         val movies: List<QuizMovie> = repository.getQuizMoviesPool()
-
-        val used = mutableSetOf<String>()
+        val generators: List<QuestionGenerator> = getGenerators(category)
 
         val questions = generators.flatMap { generator ->
             generator.generate(movies, limit = 4)
-        }.filter {
-            used.add(it.id) // prevent duplicates
         }
 
         if (questions.size < 10) {

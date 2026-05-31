@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import rs.edu.raf.showtime.core.util.NumberUtils
 import rs.edu.raf.showtime.quiz.data.QuizGeneratorImpl
 import rs.edu.raf.showtime.quiz.data.QuizRepository
+import rs.edu.raf.showtime.quiz.domain.QuizCategory
 import rs.edu.raf.showtime.quiz.domain.QuizResult
 
 class QuizViewModel(
@@ -42,7 +43,7 @@ class QuizViewModel(
             )
 
             try {
-                val session = quizGenerator.generateQuiz()
+                val session = quizGenerator.generateQuiz(category = QuizCategory.MovieKnowledge)
 
                 _state.update {
                     it.copy(
@@ -86,18 +87,18 @@ class QuizViewModel(
     }
 
     private fun handleAnswer(answer: String) {
-        val current = _state.value.currentQuestion ?: return
-        val alreadyAnswered = _state.value.isAnswered
-        if (alreadyAnswered) return
+        _state.update { state ->
+            if (state.isAnswered) return
 
-        val isCorrect = answer == current.correctAnswer
+            val current = state.currentQuestion ?: return
 
-        _state.update {
-            it.copy(
+            val isCorrect = answer == current.correctAnswer
+
+            state.copy(
                 selectedAnswer = answer,
                 isAnswered = true,
-                correctCount = it.correctCount + if (isCorrect) 1 else 0,
-                wrongCount = it.wrongCount + if (!isCorrect) 1 else 0
+                correctCount = state.correctCount + if (isCorrect) 1 else 0,
+                wrongCount = state.wrongCount + if (!isCorrect) 1 else 0
             )
         }
 

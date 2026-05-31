@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
             implementation(libs.androidx.datastore.preferences.core)
+            implementation(libs.animation)
 
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
