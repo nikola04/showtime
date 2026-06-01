@@ -75,7 +75,9 @@ fun MovieDetailsScreen(
                     uriHandler.openUri("https://www.youtube.com/watch?v=${effect.id}")
                 }
                 is MovieDetailsContract.Effect.ShowError -> {
-                    snackbarHostState.showSnackbar(effect.message)
+                    scope.launch {
+                        snackbarHostState.showSnackbar(effect.message)
+                    }
                 }
             }
         }

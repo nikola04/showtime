@@ -38,7 +38,9 @@ fun WatchlistScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is WatchlistContract.Effect.ShowError -> {
-                    snackbarHostState.showSnackbar(effect.message)
+                    scope.launch {
+                        snackbarHostState.showSnackbar(effect.message)
+                    }
                 }
             }
         }

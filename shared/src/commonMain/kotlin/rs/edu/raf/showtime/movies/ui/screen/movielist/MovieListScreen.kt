@@ -37,7 +37,9 @@ fun MovieListScreen(
                 is Effect.NavigateToFilter ->
                     onFiltersClick()
                 is Effect.ShowError -> {
-                    snackbarHostState.showSnackbar(effect.message)
+                    scope.launch {
+                        snackbarHostState.showSnackbar(effect.message)
+                    }
                 }
             }
         }
