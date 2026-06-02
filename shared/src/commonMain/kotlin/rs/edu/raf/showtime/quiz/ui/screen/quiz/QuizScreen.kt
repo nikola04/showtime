@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import rs.edu.raf.showtime.core.util.SystemBackHandler
 import rs.edu.raf.showtime.quiz.ui.screen.quiz.components.Question
 
 
@@ -48,6 +48,12 @@ fun QuizScreen(
                 is QuizContract.Effect.NavigateBack -> navigateBack()
             }
         }
+    }
+
+    SystemBackHandler(
+        enabled = state.screenState is QuizContract.ScreenState.Success && !state.showExitDialog
+    ) {
+        viewModel.onEvent(QuizContract.Event.ExitClicked)
     }
 
     if (state.showExitDialog) {
@@ -97,36 +103,22 @@ fun QuizScreen(
                         ) {
 
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Button(
-                                    onClick = {
-                                        viewModel.onEvent(QuizContract.Event.ExitClicked)
-                                    }
-                                ) {
-                                    Text("Back")
-                                }
-                                Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Question ${state.currentIndex + 1} of 10",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            ) {
+                                Text(
+                                    text = "Question ${state.currentIndex + 1} of 10",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
 
-                                    Text(
-                                        text = "${state.timeLeft}s",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                                Text(
+                                    text = "${state.timeLeft}s",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             }
-
                             Spacer(Modifier.height(12.dp))
 
                             LinearProgressIndicator(

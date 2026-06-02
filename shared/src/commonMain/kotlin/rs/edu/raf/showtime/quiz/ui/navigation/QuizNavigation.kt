@@ -24,7 +24,9 @@ fun NavGraphBuilder.quizGraph(
         val viewModel: QuizViewModel = koinViewModel()
 
         QuizScreen(viewModel, navigateBack = {
-            navController.navigate(QuizRoutes.QuizHome.route)
+            if (!navController.popBackStack()) {
+                navController.navigate(QuizRoutes.QuizHome.route)
+            }
         })
     }
 }
